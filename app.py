@@ -19,7 +19,7 @@ df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
-# print(gdf_2020.columns)
+print(gdf_2020.columns)
 
 def blank_fig(height):
     """
@@ -73,8 +73,10 @@ def get_figure(opacity):
     tgdf = gdf_2020.merge(df, on='FIPS')
     tgdf = tgdf.set_index('FIPS')
     print(tgdf.columns)
+    
+    fig=go.Figure()
 
-    fig = go.Figure(go.Scattermapbox(
+    fig.add_trace(go.Scattermapbox(
             lat=tgdf['geocoded_latitude'],
             lon=tgdf['geocoded_longitude'],
             mode='markers',
@@ -86,12 +88,14 @@ def get_figure(opacity):
                                             
   
 
-    # fig = px.choropleth_mapbox(tgdf, 
-    #                             geojson=tgdf.geometry, 
-    #                             color=tgdf.county,                               
-    #                             locations=tgdf.index, 
-    #                             # featureidkey="properties.TRACTCE20",
-    #                             opacity=opacity)
+    fig2 = px.choropleth_mapbox(gdf_2020, 
+                                geojson=gdf_2020.geometry, 
+                                color=gdf_2020.STATEFP,                               
+                                locations=gdf_2020.index, 
+                                # featureidkey="properties.TRACTCE20",
+                                opacity=opacity)
+    
+    fig.add_traces(list(fig2.select_traces()))
 
     fig.update_layout(mapbox_style="carto-positron", 
                       mapbox_zoom=10.4,
