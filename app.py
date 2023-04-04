@@ -98,11 +98,15 @@ def get_figure(variable, opacity):
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
     df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
-    tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
+    selected_tracts = df_SVI_2020.loc[df_SVI_2020[variable] == 1]
+    tgdf = gdf_2020.merge(selected_tracts, on='FIPS')
     # print(df_SVI_2020['FIPS'])
     tgdf = tgdf.set_index('FIPS')
     # print(tgdf.columns)
     # print(tgdf)
+    
+    print(selected_tracts)
+
     
     
     fig=go.Figure()
