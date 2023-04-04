@@ -19,7 +19,7 @@ df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 # gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
-print(gdf_2020['FIPS'])
+# print(gdf_2020['FIPS'])
 
 df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
 df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
@@ -53,7 +53,7 @@ app.layout = dbc.Container([
                     },
                     id = 'opacity',
                 ),
-            ], width=6),
+            ], width=2),
             dbc.Col([
                 dcc.RadioItems(
                     id='category-radio',
@@ -65,7 +65,7 @@ app.layout = dbc.Container([
                     ],
                     value='F_' 
                 ),
-            ], width=3),
+            ], width=2),
             dbc.Col([
                 dcc.Dropdown(
                     id='variable-dropdown',
@@ -99,10 +99,10 @@ def get_figure(variable, opacity):
     df['FIPS'] = df["FIPS"].astype(str)
     df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
     tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
-    print(df_SVI_2020['FIPS'])
+    # print(df_SVI_2020['FIPS'])
     tgdf = tgdf.set_index('FIPS')
     # print(tgdf.columns)
-    print(tgdf)
+    # print(tgdf)
     
     
     fig=go.Figure()
