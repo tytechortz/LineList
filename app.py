@@ -21,6 +21,8 @@ gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
 print(gdf_2020.columns)
 
+df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
+
 def blank_fig(height):
     """
     Build blank figure with the requested height
@@ -49,6 +51,23 @@ app.layout = dbc.Container([
                     id = 'opacity',
                 ),
             ], width=6),
+            dbc.Col([
+                dcc.RadioItems(
+                    id='category-radio',
+                    options=[
+                        {'label': 'Total', 'value': 'E_'},
+                        {'label': 'Pct.', 'value': 'EP_'},
+                        {'label': 'Percentile', 'value': 'EPL_'},
+                        {'label': 'Flag', 'value': 'F_'},
+                    ],
+                    value='E_' 
+                ),
+            ], width=3),
+            dbc.Col([
+                dcc.Dropdown(
+                    id='variable-dropdown',
+                ),
+            ], width=2)
         ]),
 ])
 
@@ -62,17 +81,13 @@ app.layout = dbc.Container([
 )
 def get_figure(opacity):
   
-    # df = pd.read_json(selected_data)
-    # df['FIPS'] = df["FIPS"].astype(str)
-    # df = df_SVI_2016
-    # df['FIPS'] = df["FIPS"].astype(str)
-    
-    # selection = dropdown
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
     tgdf = gdf_2020.merge(df, on='FIPS')
     tgdf = tgdf.set_index('FIPS')
     print(tgdf.columns)
+
+    
     
     fig=go.Figure()
 
