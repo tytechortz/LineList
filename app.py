@@ -10,6 +10,8 @@ app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[db
 
 header = html.Div("Arapahoe Covid-19 Case Investigation Tool", className="h2 p-2 text-white bg-primary text-center")
 
+df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+print(df)
 
 
 app.layout = dbc.Container([
