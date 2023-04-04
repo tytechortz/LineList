@@ -18,10 +18,11 @@ df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 # print(df)
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
-gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
-# print(gdf_2020.columns)
+# gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
+print(gdf_2020['FIPS'])
 
 df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
+df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
 
 col_list = list(df_SVI_2020)
 
@@ -62,7 +63,7 @@ app.layout = dbc.Container([
                         {'label': 'Percentile', 'value': 'EPL_'},
                         {'label': 'Flag', 'value': 'F_'},
                     ],
-                    value='E_' 
+                    value='F_' 
                 ),
             ], width=3),
             dbc.Col([
@@ -78,7 +79,7 @@ app.layout = dbc.Container([
         Input('category-radio', 'value')
 )
 def category_options(selected_value):
-    # print(selected_value)
+    print(selected_value)
     # variables = list(lambda x: x, col_list)
     variables = [{'label': i, 'value': i} for i in list(filter(lambda x: x.startswith(selected_value), col_list))]
     # print([{'label': i, 'value': i} for i in col_list[filter(lambda x: x.startswith(selected_value))]])
@@ -98,8 +99,9 @@ def get_figure(variable, opacity):
     df['FIPS'] = df["FIPS"].astype(str)
     df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
     tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
+    print(df_SVI_2020['FIPS'])
     tgdf = tgdf.set_index('FIPS')
-    print(tgdf.columns)
+    # print(tgdf.columns)
     print(tgdf)
     
     
