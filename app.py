@@ -19,9 +19,11 @@ df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
-print(gdf_2020.columns)
+# print(gdf_2020.columns)
 
 df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
+
+col_list = list(df_SVI_2020)
 
 def blank_fig(height):
     """
@@ -71,29 +73,41 @@ app.layout = dbc.Container([
         ]),
 ])
 
+@app.callback(
+        Output('variable-dropdown', 'options'),
+        Input('category-radio', 'value')
+)
+def category_options(selected_value):
+    # print(selected_value)
+    # variables = list(lambda x: x, col_list)
+    variables = [{'label': i, 'value': i} for i in list(filter(lambda x: x.startswith(selected_value), col_list))]
+    # print([{'label': i, 'value': i} for i in col_list[filter(lambda x: x.startswith(selected_value))]])
+    return variables 
+
 
 @app.callback(
     Output('ct-map', 'figure'),
     # Input('year-map-data', 'data'),
-    # Input('variable-dropdown', 'value'),
+    Input('variable-dropdown', 'value'),
     # Input('year', 'value'),
     Input('opacity', 'value')
 )
-def get_figure(opacity):
+def get_figure(variable, opacity):
   
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
-    tgdf = gdf_2020.merge(df, on='FIPS')
+    df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+    tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
     tgdf = tgdf.set_index('FIPS')
     print(tgdf.columns)
-
+    print(tgdf)
     
     
     fig=go.Figure()
 
     fig.add_trace(go.Scattermapbox(
-            lat=tgdf['geocoded_latitude'],
-            lon=tgdf['geocoded_longitude'],
+            lat=df['geocoded_latitude'],
+            lon=df['geocoded_longitude'],
             mode='markers',
             marker=go.scattermapbox.Marker(
                 size=10,
@@ -103,10 +117,10 @@ def get_figure(opacity):
                                             
   
 
-    fig2 = px.choropleth_mapbox(gdf_2020, 
-                                geojson=gdf_2020.geometry, 
-                                color=gdf_2020.STATEFP,                               
-                                locations=gdf_2020.index, 
+    fig2 = px.choropleth_mapbox(tgdf, 
+                                geojson=tgdf.geometry, 
+                                color=variable,                               
+                                locations=tgdf.index, 
                                 # featureidkey="properties.TRACTCE20",
                                 opacity=opacity)
     
