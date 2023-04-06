@@ -125,8 +125,8 @@ def get_figure(variable, opacity):
     layer = [
         {
             'source': tgdf['geometry'].__geo_interface__,
-            'type': 'line',
-            'color': 'blue'
+            'type': 'fill',
+            'color': 'lightblue'
         }
     ]
     # fig2 = px.choropleth_mapbox(tgdf, 
