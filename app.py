@@ -121,19 +121,26 @@ def get_figure(variable, opacity):
             )
     ))
                                             
-  
-
-    fig2 = px.choropleth_mapbox(tgdf, 
-                                geojson=tgdf.geometry, 
-                                color=variable,                               
-                                locations=tgdf.index, 
-                                # featureidkey="properties.TRACTCE20",
-                                opacity=opacity)
     
-    fig.add_traces(list(fig2.select_traces()))
+    layer = [
+        {
+            'source': tgdf['geometry'].__geo_interface__,
+            'type': 'line',
+            'color': 'blue'
+        }
+    ]
+    # fig2 = px.choropleth_mapbox(tgdf, 
+    #                             geojson=tgdf.geometry, 
+    #                             color=variable,                               
+    #                             locations=tgdf.index, 
+    #                             # featureidkey="properties.TRACTCE20",
+    #                             opacity=opacity)
+    
+    # fig.add_traces(list(fig2.select_traces()))
 
     fig.update_layout(mapbox_style="carto-positron", 
                       mapbox_zoom=10.4,
+                      mapbox_layers=layer,
                       mapbox_center={"lat": 39.65, "lon": -104.8},
                       margin={"r":0,"t":0,"l":0,"b":0},
                       uirevision='constant')
