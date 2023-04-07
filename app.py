@@ -14,7 +14,7 @@ header = html.Div("Arapahoe Covid-19 Case Investigation Tool", className="h2 p-2
 template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
 
-df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+# df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 # print(df)
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
@@ -69,9 +69,11 @@ app.layout = dbc.Container([
             dbc.Col([
                 dcc.Dropdown(
                     id='variable-dropdown',
+                    multi=True
                 ),
             ], width=2)
         ]),
+        dcc.Store(id='all-map-data', storage_type='session'),
 ])
 
 @app.callback(
@@ -85,65 +87,91 @@ def category_options(selected_value):
     # print([{'label': i, 'value': i} for i in col_list[filter(lambda x: x.startswith(selected_value))]])
     return variables 
 
+@app.callback(
+    Output('all-map-data', 'data'),
+    Input('variable-dropdown', 'value'),
+)
+def get_data(variable):
+    print(variable)
+    df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+   
+    return df.to_json()
+
 
 @app.callback(
     Output('ct-map', 'figure'),
-    # Input('year-map-data', 'data'),
+    Input('all-map-data', 'data'),
     Input('variable-dropdown', 'value'),
     # Input('year', 'value'),
     Input('opacity', 'value')
 )
-def get_figure(variable, opacity):
-  
+def get_figure(selected_data, variable, opacity):
+    df = pd.read_json(selected_data)
+#     print(variable)
+#     # variable.append('FIPS')
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
-    df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
-    selected_tracts = df_SVI_2020.loc[df_SVI_2020[variable] == 1]
-    tgdf = gdf_2020.merge(selected_tracts, on='FIPS')
-    # print(df_SVI_2020['FIPS'])
-    tgdf = tgdf.set_index('FIPS')
-    # print(tgdf.columns)
-    # print(tgdf)
-    
-    print(selected_tracts)
+#     # df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+#     tracts = gdf_2020['FIPS'].apply(lambda x: x[5:])
+#     print(df_SVI_2020['FIPS'])
+#     # print(df)
+#     print(tracts)
+#     if variable is None:
+
+#     else:   
+
+#         for i in variable:
+#             selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
+
+
+#             combo_tracts = selected_tracts.join(tracts)
+#             print(combo_tracts)
+#     # selected_tracts = df_SVI_2020.loc[df_SVI_2020[variable] == 1]
+#             tgdf = gdf_2020.merge(combo_tracts, on='FIPS')
+#             # print(df_SVI_2020['FIPS'])
+#             tgdf = tgdf.set_index('FIPS')
+#             print(tgdf.columns)
+# print(tgdf)
+
+    #     print(selected_tracts)
 
     
     
     fig=go.Figure()
 
-    fig.add_trace(go.Scattermapbox(
-            lat=df['geocoded_latitude'],
-            lon=df['geocoded_longitude'],
-            mode='markers',
-            marker=go.scattermapbox.Marker(
-                size=10,
-                color='red'
-            )
-    ))
+    # fig.add_trace(go.Scattermapbox(
+    #         lat=df['geocoded_latitude'],
+    #         lon=df['geocoded_longitude'],
+    #         mode='markers',
+    #         marker=go.scattermapbox.Marker(
+    #             size=10,
+    #             color='red'
+    #         )
+    # ))
                                             
     
-    layer = [
-        {
-            'source': tgdf['geometry'].__geo_interface__,
-            'type': 'fill',
-            'color': 'lightblue'
-        }
-    ]
-    # fig2 = px.choropleth_mapbox(tgdf, 
-    #                             geojson=tgdf.geometry, 
-    #                             color=variable,                               
-    #                             locations=tgdf.index, 
-    #                             # featureidkey="properties.TRACTCE20",
-    #                             opacity=opacity)
+    # layer = [
+    #     {
+    #         'source': tgdf['geometry'].__geo_interface__,
+    #         'type': 'fill',
+    #         'color': 'lightblue'
+    #     }
+    # ]
+    # # fig2 = px.choropleth_mapbox(tgdf, 
+    # #                             geojson=tgdf.geometry, 
+    # #                             color=variable,                               
+    # #                             locations=tgdf.index, 
+    # #                             # featureidkey="properties.TRACTCE20",
+    # #                             opacity=opacity)
     
-    # fig.add_traces(list(fig2.select_traces()))
+    # # fig.add_traces(list(fig2.select_traces()))
 
-    fig.update_layout(mapbox_style="carto-positron", 
-                      mapbox_zoom=10.4,
-                      mapbox_layers=layer,
-                      mapbox_center={"lat": 39.65, "lon": -104.8},
-                      margin={"r":0,"t":0,"l":0,"b":0},
-                      uirevision='constant')
+    # fig.update_layout(mapbox_style="carto-positron", 
+    #                   mapbox_zoom=10.4,
+    #                   mapbox_layers=layer,
+    #                   mapbox_center={"lat": 39.65, "lon": -104.8},
+    #                   margin={"r":0,"t":0,"l":0,"b":0},
+    #                   uirevision='constant')
 
 
     return fig
