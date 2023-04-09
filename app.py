@@ -143,7 +143,7 @@ def get_figure(selected_data, variable, opacity):
         return fig
     
     else:
-        variable.append('start')
+        # variable.append('start')
         # print(tgdf['FIPS'])
         # # tgdf.set_index('FIPS')
         # print(type(tgdf))
@@ -152,14 +152,25 @@ def get_figure(selected_data, variable, opacity):
         print(variable)
         tgdf['start'] = 0
         for i in variable:
+            # selected_tracts = tgdf.loc[tgdf[i] == 1, variable]
 
-
+            # fig.add_trace(go.Choroplethmapbox(
+            #                         geojson=eval(tgdf['geometry'].to_json()),
+            #                         locations=selected_tracts.index,
+            #                         z=selected_tracts[variable[variable.index(i)]],
+            #                         # coloraxis='coloraxis',
+            #                         colorscale=[[0,'rgba(0,0,0,0)'],[1,'lightblue']],
+            #                         zmin=0,
+            #                         zmax=1,
+            # ))
             fig.add_trace(go.Choroplethmapbox(
                                     geojson=eval(tgdf['geometry'].to_json()),
                                     locations=tgdf.index,
                                     z=tgdf[variable[variable.index(i)-1]],
-                                    coloraxis='coloraxis'
-
+                                    # coloraxis='coloraxis',
+                                    colorscale=[[0,'rgba(0,0,0,0)'],[1,'lightblue']],
+                                    zmin=0,
+                                    zmax=1,
             ))
 
         fig.update_layout(mapbox_style="carto-positron", 
@@ -167,7 +178,9 @@ def get_figure(selected_data, variable, opacity):
                         #   mapbox_layers=layer,
                         mapbox_center={"lat": 39.65, "lon": -104.8},
                         margin={"r":0,"t":0,"l":0,"b":0},
-                        uirevision='constant'),
+                        uirevision='constant',
+                        ),
+
 
         return fig
     # fig.add_trace(px.choropleth_mapbox(tgdf, 
