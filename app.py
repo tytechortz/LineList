@@ -143,7 +143,7 @@ def get_figure(selected_data, variable, opacity):
         return fig
     
     else:
-        # variable.append('start')
+        variable.append('start')
         # print(tgdf['FIPS'])
         # # tgdf.set_index('FIPS')
         # print(type(tgdf))
