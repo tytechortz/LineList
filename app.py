@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Input, Output, State
+from dash import Dash, html, dcc, Input, Output, ctx
 import dash_bootstrap_components as dbc
 import geopandas as gpd
 import plotly.express as px
@@ -119,32 +119,27 @@ def get_data(variable):
     Input('opacity', 'value')
 )
 def get_figure(selected_data, variable, opacity):
-    # print(variable)
+    print(variable)
     # df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
     # print(gdf_2020['FIPS'])
     # gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
     # print(gdf_2020)
     # print(df_SVI_2020)
     tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
-
+    # print(tgdf)
     # print(tgdf[variable])
     df = pd.read_json(selected_data)
 #     print(variable)
     # variable.append('FIPS')
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
+
+    df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
+    df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
+
     fig=go.Figure()
 
     
-    # fig.add_trace(go.Choroplethmapbox(
-    #                 geojson=eval(tgdf['geometry'].to_json()),
-    #                 locations=tgdf.index,
-    #                 z=tgdf[variable],
-    #                 # coloraxis='coloraxis',
-    #                 colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
-    #                 zmin=0,
-    #                 zmax=1,
-    #         ))
 
     fig.add_trace(go.Scattermapbox(
                     lat=df['geocoded_latitude'],
@@ -155,6 +150,21 @@ def get_figure(selected_data, variable, opacity):
                         color='red'
                     )
             ))
+    
+    for i in variable:
+
+    # if 'F_UNINSUR' in(variable):
+        fig.add_trace(go.Choroplethmapbox(
+                        geojson=eval(df_UI['geometry'].to_json()),
+                        locations=df_UI.index,
+                        z=df_UI[i],
+                        # coloraxis='coloraxis',
+                        colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+                        zmin=0,
+                        zmax=1,
+                ))
+
+    
 
     fig.update_layout(mapbox_style="carto-positron", 
                         mapbox_zoom=10.4,
