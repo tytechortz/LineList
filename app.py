@@ -147,7 +147,9 @@ def get_figure(selected_data, variable, opacity):
         # # tgdf.set_index('FIPS')
         # print(type(tgdf))
         # print(tgdf[variable])
-        fig=go.Figure(go.Choroplethmapbox(
+        fig=go.Figure()
+
+        fig.add_trace(go.Choroplethmapbox(
                                 geojson=eval(tgdf['geometry'].to_json()),
                                 locations=tgdf.index,
                                 z=tgdf[variable[0]],
