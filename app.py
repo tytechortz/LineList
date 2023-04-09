@@ -19,11 +19,14 @@ template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020 = gdf_2020.to_crs('WGS84')
-# gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
-# print(gdf_2020['FIPS'])
+gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
+print(gdf_2020['FIPS'])
 
 df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
 df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
+df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[5:])
+print(df_SVI_2020['FIPS'])
 
 col_list = list(df_SVI_2020)
 
@@ -107,21 +110,34 @@ def get_data(variable):
     Input('opacity', 'value')
 )
 def get_figure(selected_data, variable, opacity):
+    print(variable)
+    # df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+    print(gdf_2020['FIPS'])
+    # gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
+    tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS') 
+    print(tgdf.columns)
 
-    
+    if variable is None:
 
-    fig=go.Figure(go.Choroplethmapbox(
         
-    ))
+        # fig=go.Figure()
+        fig=go.Figure(go.Choroplethmapbox(
+                                geojson=eval(tgdf['geometry'].to_json()),
+                                locations=tgdf.index,
+                                z=tgdf['STATEFP'],
+                                coloraxis='coloraxis'
 
-    fig.update_layout(mapbox_style="carto-positron", 
-                      mapbox_zoom=10.4,
-                    #   mapbox_layers=layer,
-                      mapbox_center={"lat": 39.65, "lon": -104.8},
-                      margin={"r":0,"t":0,"l":0,"b":0},
-                      uirevision='constant')
+        ))
 
-    return fig
+        fig.update_layout(mapbox_style="carto-positron", 
+                        mapbox_zoom=10.4,
+                        #   mapbox_layers=layer,
+                        mapbox_center={"lat": 39.65, "lon": -104.8},
+                        margin={"r":0,"t":0,"l":0,"b":0},
+                        uirevision='constant',
+                        coloraxis_showscale=False),
+
+        return fig
     # fig.add_trace(px.choropleth_mapbox(tgdf, 
     #                             geojson=tgdf.geometry, 
     #                             color=variable,                               
