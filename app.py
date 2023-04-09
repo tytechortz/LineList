@@ -119,6 +119,11 @@ def get_figure(selected_data, variable, opacity):
     tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
 
     # print(tgdf[variable])
+    df = pd.read_json(selected_data)
+#     print(variable)
+    # variable.append('FIPS')
+    df.rename(columns={'tract2000':'FIPS'}, inplace=True)
+    df['FIPS'] = df["FIPS"].astype(str)
 
     if variable is None:
 
@@ -148,10 +153,12 @@ def get_figure(selected_data, variable, opacity):
         # # tgdf.set_index('FIPS')
         # print(type(tgdf))
         # print(tgdf[variable])
+        color_list = ['lightblue', 'lightgreen', 'pink']
         fig=go.Figure()
         print(variable)
         tgdf['start'] = 0
         for i in variable:
+            print(len(variable))
             # selected_tracts = tgdf.loc[tgdf[i] == 1, variable]
 
             # fig.add_trace(go.Choroplethmapbox(
@@ -164,13 +171,23 @@ def get_figure(selected_data, variable, opacity):
             #                         zmax=1,
             # ))
             fig.add_trace(go.Choroplethmapbox(
-                                    geojson=eval(tgdf['geometry'].to_json()),
-                                    locations=tgdf.index,
-                                    z=tgdf[variable[variable.index(i)-1]],
-                                    # coloraxis='coloraxis',
-                                    colorscale=[[0,'rgba(0,0,0,0)'],[1,'lightblue']],
-                                    zmin=0,
-                                    zmax=1,
+                    geojson=eval(tgdf['geometry'].to_json()),
+                    locations=tgdf.index,
+                    z=tgdf[variable[variable.index(i)-1]],
+                    # coloraxis='coloraxis',
+                    colorscale=[[0,'rgba(0,0,0,0)'],[1,color_list[len(variable)-1]]],
+                    zmin=0,
+                    zmax=1,
+            ))
+
+            fig.add_trace(go.Scattermapbox(
+                    lat=df['geocoded_latitude'],
+                    lon=df['geocoded_longitude'],
+                    mode='markers',
+                    marker=go.scattermapbox.Marker(
+                        size=10,
+                        color='red'
+                    )
             ))
 
         fig.update_layout(mapbox_style="carto-positron", 
