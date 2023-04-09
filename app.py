@@ -107,51 +107,98 @@ def get_data(variable):
     Input('opacity', 'value')
 )
 def get_figure(selected_data, variable, opacity):
-    df = pd.read_json(selected_data)
-#     print(variable)
-    # variable.append('FIPS')
-    df.rename(columns={'tract2000':'FIPS'}, inplace=True)
-    df['FIPS'] = df["FIPS"].astype(str)
-    df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+
     
-    print(df_SVI_2020)
-    tracts = gdf_2020['FIPS'].apply(lambda x: x[5:])
-    tracts.name = 'FIPS'
-    tracts = tracts.to_frame()
+
+    fig=go.Figure(go.Choroplethmapbox(
+        
+    ))
+
+    fig.update_layout(mapbox_style="carto-positron", 
+                      mapbox_zoom=10.4,
+                    #   mapbox_layers=layer,
+                      mapbox_center={"lat": 39.65, "lon": -104.8},
+                      margin={"r":0,"t":0,"l":0,"b":0},
+                      uirevision='constant')
+
+    return fig
+    # fig.add_trace(px.choropleth_mapbox(tgdf, 
+    #                             geojson=tgdf.geometry, 
+    #                             color=variable,                               
+    #                             locations=tgdf.index, 
+    #                             # featureidkey="properties.TRACTCE20",
+    #                             opacity=opacity)
+    # )
+
+
+
+
+
+    # fig.update_layout(mapbox_style="carto-positron", 
+    #                   mapbox_zoom=10.4,
+    #                 #   mapbox_layers=layer,
+    #                   mapbox_center={"lat": 39.65, "lon": -104.8},
+    #                   margin={"r":0,"t":0,"l":0,"b":0},
+    #                   uirevision='constant')
+
+
+    # return fig
+
+
+
+
+
+
+#     df = pd.read_json(selected_data)
+# #     print(variable)
+#     # variable.append('FIPS')
+#     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
+#     df['FIPS'] = df["FIPS"].astype(str)
+#     # df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+    
+#     # print(df_SVI_2020)
+#     tracts = gdf_2020['FIPS'].apply(lambda x: x[5:])
+#     tracts.name = 'FIPS'
+#     tracts = tracts.to_frame()
     # print(df_SVI_2020['FIPS'])
     # print(gdf_2020['FIPS'])
 #     # print(df)
     # print(tracts)
-    if variable is None:
-        tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
-        fig = px.choropleth_mapbox(tgdf, 
-                                geojson=tgdf.geometry, 
-                                color=variable,                               
-                                locations=tgdf.index, 
-                                # featureidkey="properties.TRACTCE20",
-                                opacity=opacity)
+    # if variable is None:
+    #     df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+    #     tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
+    #     fig = px.choropleth_mapbox(tgdf, 
+    #                             geojson=tgdf.geometry, 
+    #                             color=variable,                               
+    #                             locations=tgdf.index, 
+    #                             # featureidkey="properties.TRACTCE20",
+    #                             opacity=opacity)
 
 
 
 
 
-    else:
-        df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[5:])
-        fig = go.Figure(go.Choroplethmapbox())
-        layers = []
-        # variable.append("FIPS") 
-        print(variable) 
-        d = {}
-        cols = ['variable', 'FIPS']
-        for i in variable:
+    # else:
+    #     df2 = df_SVI_2020
+    #     df2['FIPS'] = df2['FIPS'].apply(lambda x: x[5:])
+    #     print(df2)
+    #     fig = go.Figure(go.Choroplethmapbox())
+    #     layers = []
+    #     # variable.append("FIPS") 
+    #     print(variable) 
+    #     d = {}
+    #     cols = ['variable', 'FIPS']
+    #     for i in variable:
 
-            d[i] = df_SVI_2020[[i, 'FIPS']]
+    #         d[i] = df2[[i, 'FIPS']]
 
-        print(d)
-        #     selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
-        # print(selected_tracts)
-        # # tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS') 
-
+    #     print(d['F_NOHSDP'])
+    #     #     selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
+    #     # print(selected_tracts)
+    #     print(gdf_2020['FIPS'])
+    #     gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[5:])
+    #     tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS') 
+    #     print(tgdf)
         # # for i in variable:
         # selected_tracts = df_SVI_2020[variable]
         #     # selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
@@ -162,12 +209,22 @@ def get_figure(selected_data, variable, opacity):
         # for i in tgdf.columns[:len(i)]:
         #     tgdf.loc[tgdf[i] == 1, i]
 
-        #     fig = px.choropleth_mapbox(tgdf, 
-        #                             geojson=tgdf.geometry, 
-        #                             color=variable,                               
-        #                             locations=tgdf.index, 
-        #                             # featureidkey="properties.TRACTCE20",
-        #                             opacity=opacity)
+        # fig = px.choropleth_mapbox(tgdf, 
+        #                         geojson=tgdf.geometry, 
+        #                         color=tgdf[variable[0]],                               
+        #                         locations=tgdf.index, 
+        #                         # featureidkey="properties.TRACTCE20",
+        #                         opacity=opacity)
+        
+        # fig.update_layout(mapbox_style="carto-positron", 
+        #               mapbox_zoom=10.4,
+        #             #   mapbox_layers=layer,
+        #               mapbox_center={"lat": 39.65, "lon": -104.8},
+        #               margin={"r":0,"t":0,"l":0,"b":0},
+        #               uirevision='constant')
+
+
+        # return fig
 
     # selected_tracts = df_SVI_2020.loc[df_SVI_2020[variable] == 1]
     # tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
@@ -215,15 +272,15 @@ def get_figure(selected_data, variable, opacity):
     
     # # fig.add_traces(list(fig2.select_traces()))
 
-    fig.update_layout(mapbox_style="carto-positron", 
-                      mapbox_zoom=10.4,
-                    #   mapbox_layers=layer,
-                      mapbox_center={"lat": 39.65, "lon": -104.8},
-                      margin={"r":0,"t":0,"l":0,"b":0},
-                      uirevision='constant')
+    # fig.update_layout(mapbox_style="carto-positron", 
+    #                   mapbox_zoom=10.4,
+    #                 #   mapbox_layers=layer,
+    #                   mapbox_center={"lat": 39.65, "lon": -104.8},
+    #                   margin={"r":0,"t":0,"l":0,"b":0},
+    #                   uirevision='constant')
 
 
-    return fig
+    # return fig
 
 
 if __name__ == "__main__":
