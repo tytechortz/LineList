@@ -71,25 +71,34 @@ app.layout = dbc.Container([
                 ),
             ], width=2),
             dbc.Col([
-                dcc.Dropdown(
-                    id='variable-dropdown',
-                    multi=True
+                dcc.Checklist(
+                    id='tract-radio',
+                    options=[
+                        {'label': 'Uninsured', 'value': 'F_UNINSUR'},
+                        {'label': 'Poverty', 'value': 'F_POV150'},
+                    ],
                 ),
-            ], width=2)
+            ], width=2),
+            # dbc.Col([
+            #     dcc.Dropdown(
+            #         id='variable-dropdown',
+            #         multi=True
+            #     ),
+            # ], width=2)
         ]),
         dcc.Store(id='all-map-data', storage_type='session'),
 ])
 
-@app.callback(
-        Output('variable-dropdown', 'options'),
-        Input('category-radio', 'value')
-)
-def category_options(selected_value):
-    print(selected_value)
-    # variables = list(lambda x: x, col_list)
-    variables = [{'label': i, 'value': i} for i in list(filter(lambda x: x.startswith(selected_value), col_list))]
-    # print([{'label': i, 'value': i} for i in col_list[filter(lambda x: x.startswith(selected_value))]])
-    return variables 
+# @app.callback(
+#         Output('variable-dropdown', 'options'),
+#         Input('category-radio', 'value')
+# )
+# def category_options(selected_value):
+#     print(selected_value)
+#     # variables = list(lambda x: x, col_list)
+#     variables = [{'label': i, 'value': i} for i in list(filter(lambda x: x.startswith(selected_value), col_list))]
+#     # print([{'label': i, 'value': i} for i in col_list[filter(lambda x: x.startswith(selected_value))]])
+#     return variables 
 
 @app.callback(
     Output('all-map-data', 'data'),
@@ -105,8 +114,8 @@ def get_data(variable):
 @app.callback(
     Output('ct-map', 'figure'),
     Input('all-map-data', 'data'),
-    Input('variable-dropdown', 'value'),
-    # Input('year', 'value'),
+    # Input('variable-dropdown', 'value'),
+    Input('tract-radio', 'value'),
     Input('opacity', 'value')
 )
 def get_figure(selected_data, variable, opacity):
@@ -124,63 +133,20 @@ def get_figure(selected_data, variable, opacity):
     # variable.append('FIPS')
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
+    fig=go.Figure()
 
-    if variable is None:
-
-        
-        # fig=go.Figure()
-        fig=go.Figure(go.Choroplethmapbox(
-                                geojson=eval(tgdf['geometry'].to_json()),
-                                locations=tgdf.index,
-                                z=tgdf['STATEFP'],
-                                coloraxis='coloraxis'
-
-        ))
-
-        fig.update_layout(mapbox_style="carto-positron", 
-                        mapbox_zoom=10.4,
-                        #   mapbox_layers=layer,
-                        mapbox_center={"lat": 39.65, "lon": -104.8},
-                        margin={"r":0,"t":0,"l":0,"b":0},
-                        uirevision='constant',
-                        coloraxis_showscale=False),
-
-        return fig
     
-    else:
-        variable.append('start')
-        # print(tgdf['FIPS'])
-        # # tgdf.set_index('FIPS')
-        # print(type(tgdf))
-        # print(tgdf[variable])
-        color_list = ['lightblue', 'lightgreen', 'pink']
-        fig=go.Figure()
-        print(variable)
-        tgdf['start'] = 0
-        for i in variable:
-            print(len(variable))
-            # selected_tracts = tgdf.loc[tgdf[i] == 1, variable]
+    # fig.add_trace(go.Choroplethmapbox(
+    #                 geojson=eval(tgdf['geometry'].to_json()),
+    #                 locations=tgdf.index,
+    #                 z=tgdf[variable],
+    #                 # coloraxis='coloraxis',
+    #                 colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+    #                 zmin=0,
+    #                 zmax=1,
+    #         ))
 
-            # fig.add_trace(go.Choroplethmapbox(
-            #                         geojson=eval(tgdf['geometry'].to_json()),
-            #                         locations=selected_tracts.index,
-            #                         z=selected_tracts[variable[variable.index(i)]],
-            #                         # coloraxis='coloraxis',
-            #                         colorscale=[[0,'rgba(0,0,0,0)'],[1,'lightblue']],
-            #                         zmin=0,
-            #                         zmax=1,
-            # ))
-            fig.add_trace(go.Choroplethmapbox(
-                    geojson=eval(tgdf['geometry'].to_json()),
-                    locations=tgdf.index,
-                    z=tgdf[variable[variable.index(i)-1]],
-                    # coloraxis='coloraxis',
-                    colorscale=[[0,'rgba(0,0,0,0)'],[1,color_list[len(variable)-1]]],
-                    zmin=0,
-                    zmax=1,
-            ))
-
-            fig.add_trace(go.Scattermapbox(
+    fig.add_trace(go.Scattermapbox(
                     lat=df['geocoded_latitude'],
                     lon=df['geocoded_longitude'],
                     mode='markers',
@@ -190,7 +156,7 @@ def get_figure(selected_data, variable, opacity):
                     )
             ))
 
-        fig.update_layout(mapbox_style="carto-positron", 
+    fig.update_layout(mapbox_style="carto-positron", 
                         mapbox_zoom=10.4,
                         #   mapbox_layers=layer,
                         mapbox_center={"lat": 39.65, "lon": -104.8},
@@ -199,28 +165,19 @@ def get_figure(selected_data, variable, opacity):
                         ),
 
 
-        return fig
-    # fig.add_trace(px.choropleth_mapbox(tgdf, 
-    #                             geojson=tgdf.geometry, 
-    #                             color=variable,                               
-    #                             locations=tgdf.index, 
-    #                             # featureidkey="properties.TRACTCE20",
-    #                             opacity=opacity)
-    # )
+    return fig
+
+
+    
+  
+    
+    
 
 
 
 
-
-    # fig.update_layout(mapbox_style="carto-positron", 
-    #                   mapbox_zoom=10.4,
-    #                 #   mapbox_layers=layer,
-    #                   mapbox_center={"lat": 39.65, "lon": -104.8},
-    #                   margin={"r":0,"t":0,"l":0,"b":0},
-    #                   uirevision='constant')
-
-
-    # return fig
+      
+   
 
 
 
