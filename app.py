@@ -143,19 +143,24 @@ def get_figure(selected_data, variable, opacity):
         return fig
     
     else:
+        variable.append('start')
         # print(tgdf['FIPS'])
         # # tgdf.set_index('FIPS')
         # print(type(tgdf))
         # print(tgdf[variable])
         fig=go.Figure()
+        print(variable)
+        tgdf['start'] = 0
+        for i in variable:
 
-        fig.add_trace(go.Choroplethmapbox(
-                                geojson=eval(tgdf['geometry'].to_json()),
-                                locations=tgdf.index,
-                                z=tgdf[variable[0]],
-                                coloraxis='coloraxis'
 
-        ))
+            fig.add_trace(go.Choroplethmapbox(
+                                    geojson=eval(tgdf['geometry'].to_json()),
+                                    locations=tgdf.index,
+                                    z=tgdf[variable[variable.index(i)-1]],
+                                    coloraxis='coloraxis'
+
+            ))
 
         fig.update_layout(mapbox_style="carto-positron", 
                         mapbox_zoom=10.4,
