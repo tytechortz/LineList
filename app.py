@@ -93,7 +93,7 @@ def category_options(selected_value):
     Input('variable-dropdown', 'value'),
 )
 def get_data(variable):
-    print(variable)
+    # print(variable)
     df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
    
     return df.to_json()
@@ -109,26 +109,68 @@ def get_data(variable):
 def get_figure(selected_data, variable, opacity):
     df = pd.read_json(selected_data)
 #     print(variable)
-#     # variable.append('FIPS')
+    # variable.append('FIPS')
     df.rename(columns={'tract2000':'FIPS'}, inplace=True)
     df['FIPS'] = df["FIPS"].astype(str)
     df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+    
+    print(df_SVI_2020)
     tracts = gdf_2020['FIPS'].apply(lambda x: x[5:])
-    print(df_SVI_2020.columns)
+    tracts.name = 'FIPS'
+    tracts = tracts.to_frame()
+    # print(df_SVI_2020['FIPS'])
+    # print(gdf_2020['FIPS'])
 #     # print(df)
-    print(tracts)
-#     if variable is None:
+    # print(tracts)
+    if variable is None:
+        tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
+        fig = px.choropleth_mapbox(tgdf, 
+                                geojson=tgdf.geometry, 
+                                color=variable,                               
+                                locations=tgdf.index, 
+                                # featureidkey="properties.TRACTCE20",
+                                opacity=opacity)
 
-#     else:   
-
-#         for i in variable:
-#             selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
 
 
-#             combo_tracts = selected_tracts.join(tracts)
-#             print(combo_tracts)
-#     # selected_tracts = df_SVI_2020.loc[df_SVI_2020[variable] == 1]
-    tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
+
+
+    else:
+        df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[5:])
+        fig = go.Figure(go.Choroplethmapbox())
+        layers = []
+        # variable.append("FIPS") 
+        print(variable) 
+        d = {}
+        cols = ['variable', 'FIPS']
+        for i in variable:
+
+            d[i] = df_SVI_2020[[i, 'FIPS']]
+
+        print(d)
+        #     selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
+        # print(selected_tracts)
+        # # tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS') 
+
+        # # for i in variable:
+        # selected_tracts = df_SVI_2020[variable]
+        #     # selected_tracts = df_SVI_2020.loc[df_SVI_2020[i] == 1, variable]
+        # print(selected_tracts)
+        #     # # print(tracts.columns)
+        # tgdf = selected_tracts.merge(gdf_2020)
+        # print(tgdf)
+        # for i in tgdf.columns[:len(i)]:
+        #     tgdf.loc[tgdf[i] == 1, i]
+
+        #     fig = px.choropleth_mapbox(tgdf, 
+        #                             geojson=tgdf.geometry, 
+        #                             color=variable,                               
+        #                             locations=tgdf.index, 
+        #                             # featureidkey="properties.TRACTCE20",
+        #                             opacity=opacity)
+
+    # selected_tracts = df_SVI_2020.loc[df_SVI_2020[variable] == 1]
+    # tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
 #             # print(df_SVI_2020['FIPS'])
 #             tgdf = tgdf.set_index('FIPS')
 #             print(tgdf.columns)
@@ -158,12 +200,18 @@ def get_figure(selected_data, variable, opacity):
     #         'color': 'lightblue'
     #     }
     # ]
-    fig = px.choropleth_mapbox(tgdf, 
-                                geojson=tgdf.geometry, 
-                                color=variable,                               
-                                locations=tgdf.index, 
-                                # featureidkey="properties.TRACTCE20",
-                                opacity=opacity)
+    # fig = px.choropleth_mapbox(tgdf, 
+    #                             geojson=tgdf.geometry, 
+    #                             color=variable,                               
+    #                             locations=tgdf.index, 
+    #                             # featureidkey="properties.TRACTCE20",
+    #                             opacity=opacity)
+    # fig = px.choropleth_mapbox(tgdf, 
+    #                             geojson=tgdf.geometry, 
+    #                             color=variable,                               
+    #                             locations=tgdf.index, 
+    #                             # featureidkey="properties.TRACTCE20",
+    #                             opacity=opacity)
     
     # # fig.add_traces(list(fig2.select_traces()))
 
