@@ -93,7 +93,6 @@ def get_tract_data(variable):
 
 @app.callback(
     Output('ct-map', 'figure'),
-    # Input('all-map-data', 'data'),
     Input('pov-data', 'data'),
     Input('ins-data', 'data'),
     Input('opacity', 'value')
@@ -103,21 +102,10 @@ def get_figure(pov_data, ins_data, opacity):
     fig=go.Figure()
     if ins_data:
         tract_data = pd.read_json(ins_data, dtype=False)
-        print(tract_data['FIPS'].dtype)
-    # print(tract_data['FIPS'].unique())
-    # print(type(tract_data['FIPS'][0]))
-    # tract_data['FIPS'] = tract_data["FIPS"].astype(str)
+   
         tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
-    # print(tract_data.columns)
-
-    # fig.add_trace(px.choropleth(
-    #     tract_data,
-    #     geojson=tract_data.features.properties.geometry,
-    #     locations=tract_data.index,
-    #     color='blue'
-    # ))
-
+    
         fig.add_trace(go.Choroplethmapbox(
                             geojson=eval(tgdf['geometry'].to_json()),
                             locations=tgdf.index,
@@ -132,19 +120,9 @@ def get_figure(pov_data, ins_data, opacity):
     if pov_data:
         tract_data = pd.read_json(pov_data, dtype=False)
         print(tract_data['FIPS'].dtype)
-    # print(tract_data['FIPS'].unique())
-    # print(type(tract_data['FIPS'][0]))
-    # tract_data['FIPS'] = tract_data["FIPS"].astype(str)
+   
         tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
-    # print(tract_data.columns)
-
-    # fig.add_trace(px.choropleth(
-    #     tract_data,
-    #     geojson=tract_data.features.properties.geometry,
-    #     locations=tract_data.index,
-    #     color='blue'
-    # ))
 
         fig.add_trace(go.Choroplethmapbox(
                             geojson=eval(tgdf['geometry'].to_json()),
@@ -167,7 +145,6 @@ def get_figure(pov_data, ins_data, opacity):
                     )
             ))
     
-
 
 
     fig.update_layout(mapbox_style="carto-positron", 
