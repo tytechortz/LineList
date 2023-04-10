@@ -118,6 +118,7 @@ def get_figure(var_data, opacity):
                             colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
                             zmin=0,
                             zmax=1,
+                            showscale=False
                     ))
 
     fig.add_trace(go.Scattermapbox(
