@@ -21,6 +21,8 @@ df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
 df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
 df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[4:])
 
+df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+
 def blank_fig(height):
     """
     Build blank figure with the requested height
@@ -58,8 +60,44 @@ app.layout = dbc.Container([
                 ),
             ], width=2),
         ]),      
-        dcc.Store(id='all-map-data', storage_type='session'),
+        # dcc.Store(id='all-map-data', storage_type='session'),
 ])   
+
+@app.callback(
+    Output('ct-map', 'figure'),
+    # Input('all-map-data', 'data'),
+    Input('tract-radio', 'value'),
+    Input('opacity', 'value')
+)
+def get_figure(variable, opacity):
+
+    fig=go.Figure()
+
+    fig.add_trace(go.Scattermapbox(
+                    lat=df['geocoded_latitude'],
+                    lon=df['geocoded_longitude'],
+                    mode='markers',
+                    marker=go.scattermapbox.Marker(
+                        size=10,
+                        color='red'
+                    )
+            ))
+    
+
+
+
+    fig.update_layout(mapbox_style="carto-positron", 
+                        mapbox_zoom=10.4,
+                        #   mapbox_layers=layer,
+                        mapbox_center={"lat": 39.65, "lon": -104.8},
+                        margin={"r":0,"t":0,"l":0,"b":0},
+                        uirevision='constant',
+                        ),
+
+
+    return fig
+
+
 
 
 if __name__ == "__main__":
