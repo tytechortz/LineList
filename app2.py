@@ -61,7 +61,7 @@ app.layout = dbc.Container([
                 ),
             ], width=2),
         ]),      
-        dcc.Store(id='variable-data', storage_type='session'),
+        dcc.Store(id='variable-data', storage_type='memory'),
 ])  
 
 @app.callback(
@@ -81,8 +81,8 @@ def get_tract_data(variable):
     # df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
     # print(type(df_UI))
         # df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
-
-    return selected_rows.to_json()
+    if 'F_UNINSUR' in variable:
+        return selected_rows.to_json()
 
 @app.callback(
     Output('ct-map', 'figure'),
@@ -93,12 +93,13 @@ def get_tract_data(variable):
 def get_figure(var_data, opacity):
 
     fig=go.Figure()
-    tract_data = pd.read_json(var_data, dtype=False)
-    print(tract_data['FIPS'].dtype)
+    if var_data:
+        tract_data = pd.read_json(var_data, dtype=False)
+        print(tract_data['FIPS'].dtype)
     # print(tract_data['FIPS'].unique())
     # print(type(tract_data['FIPS'][0]))
     # tract_data['FIPS'] = tract_data["FIPS"].astype(str)
-    tgdf = gdf_2020.merge(tract_data, on='FIPS')
+        tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
     # print(tract_data.columns)
 
@@ -109,15 +110,15 @@ def get_figure(var_data, opacity):
     #     color='blue'
     # ))
 
-    fig.add_trace(go.Choroplethmapbox(
-                        geojson=eval(tgdf['geometry'].to_json()),
-                        locations=tgdf.index,
-                        z=tgdf['F_UNINSUR'],
-                        # coloraxis='coloraxis',
-                        colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
-                        zmin=0,
-                        zmax=1,
-                ))
+        fig.add_trace(go.Choroplethmapbox(
+                            geojson=eval(tgdf['geometry'].to_json()),
+                            locations=tgdf.index,
+                            z=tgdf['F_UNINSUR'],
+                            # coloraxis='coloraxis',
+                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+                            zmin=0,
+                            zmax=1,
+                    ))
 
     fig.add_trace(go.Scattermapbox(
                     lat=df['geocoded_latitude'],
