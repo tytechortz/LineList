@@ -14,6 +14,7 @@ template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020 = gdf_2020.to_crs('WGS84')
+# gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[4:])
 
 df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
@@ -68,14 +69,20 @@ app.layout = dbc.Container([
     Input('tract-radio', 'value'))
 def get_tract_data(variable):
 
-    tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
+    selected_rows=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+    # selected_rows = selected_rows[['F_UNINSUR','FIPS']]
+    selected_rows['FIPS'] = selected_rows["FIPS"].astype(str)
+    print(selected_rows['FIPS'])
+    print(selected_rows['FIPS'].dtype)
+    # tgdf = gdf_2020.merge(selected_rows, on='FIPS')
 
-    for i in variable:
+    # for i in variable:
         # print(variable)
-        df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
-        df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
+    # df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
+    # print(type(df_UI))
+        # df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
 
-    return df_UI.to_json()
+    return selected_rows.to_json()
 
 @app.callback(
     Output('ct-map', 'figure'),
@@ -86,20 +93,31 @@ def get_tract_data(variable):
 def get_figure(var_data, opacity):
 
     fig=go.Figure()
-    tract_data = pd.read_json(var_data)
-    print(tract_data)
-
+    tract_data = pd.read_json(var_data, dtype=False)
+    print(tract_data['FIPS'].dtype)
+    # print(tract_data['FIPS'].unique())
+    # print(type(tract_data['FIPS'][0]))
+    # tract_data['FIPS'] = tract_data["FIPS"].astype(str)
+    tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
+    # print(tract_data.columns)
+
+    # fig.add_trace(px.choropleth(
+    #     tract_data,
+    #     geojson=tract_data.features.properties.geometry,
+    #     locations=tract_data.index,
+    #     color='blue'
+    # ))
 
     # fig.add_trace(go.Choroplethmapbox(
-    #     geojson=eval(tract_data['geometry'].to_json()),
-    #     locations=tract_data.index,
-    #     z=tract_data[],
-    #     # coloraxis='coloraxis',
-    #     colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
-    #     zmin=0,
-    #     zmax=1,
-    # ))
+    #                     geojson=eval(tgdf['geometry'].to_json()),
+    #                     locations=tgdf.index,
+    #                     z=tgdf['F_UNINSUR'],
+    #                     # coloraxis='coloraxis',
+    #                     colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+    #                     zmin=0,
+    #                     zmax=1,
+    #             ))
 
     fig.add_trace(go.Scattermapbox(
                     lat=df['geocoded_latitude'],
