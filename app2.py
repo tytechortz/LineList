@@ -75,7 +75,7 @@ def get_tract_data(variable):
         df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
         df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
 
-    return(print(variable))
+    return df_UI.to_json()
 
 @app.callback(
     Output('ct-map', 'figure'),
@@ -86,24 +86,20 @@ def get_tract_data(variable):
 def get_figure(var_data, opacity):
 
     fig=go.Figure()
+    tract_data = pd.read_json(var_data)
+    print(tract_data)
 
-    print(var_data)
+    
 
-    tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
-
-    df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
-    df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
-
-    # for i in variable:
-    #     fig.add_trace(go.Choroplethmapbox(
-    #         geojson=eval(df_UI['geometry'].to_json()),
-    #         locations=df_UI.index,
-    #         z=df_UI[i],
-    #         # coloraxis='coloraxis',
-    #         colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
-    #         zmin=0,
-    #         zmax=1,
-    #     ))
+    # fig.add_trace(go.Choroplethmapbox(
+    #     geojson=eval(tract_data['geometry'].to_json()),
+    #     locations=tract_data.index,
+    #     z=tract_data[],
+    #     # coloraxis='coloraxis',
+    #     colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+    #     zmin=0,
+    #     zmax=1,
+    # ))
 
     fig.add_trace(go.Scattermapbox(
                     lat=df['geocoded_latitude'],
