@@ -109,15 +109,15 @@ def get_figure(var_data, opacity):
     #     color='blue'
     # ))
 
-    # fig.add_trace(go.Choroplethmapbox(
-    #                     geojson=eval(tgdf['geometry'].to_json()),
-    #                     locations=tgdf.index,
-    #                     z=tgdf['F_UNINSUR'],
-    #                     # coloraxis='coloraxis',
-    #                     colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
-    #                     zmin=0,
-    #                     zmax=1,
-    #             ))
+    fig.add_trace(go.Choroplethmapbox(
+                        geojson=eval(tgdf['geometry'].to_json()),
+                        locations=tgdf.index,
+                        z=tgdf['F_UNINSUR'],
+                        # coloraxis='coloraxis',
+                        colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+                        zmin=0,
+                        zmax=1,
+                ))
 
     fig.add_trace(go.Scattermapbox(
                     lat=df['geocoded_latitude'],
