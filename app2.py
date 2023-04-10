@@ -61,40 +61,48 @@ app.layout = dbc.Container([
                 ),
             ], width=2),
         ]),      
-        dcc.Store(id='variable-data', storage_type='memory'),
+        dcc.Store(id='pov-data', storage_type='memory'),
+        dcc.Store(id='ins-data', storage_type='memory'),
 ])  
 
 @app.callback(
-    Output('variable-data', 'data'),
+    Output('pov-data', 'data'),
     Input('tract-radio', 'value'))
 def get_tract_data(variable):
 
-    selected_rows=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
-    # selected_rows = selected_rows[['F_UNINSUR','FIPS']]
-    selected_rows['FIPS'] = selected_rows["FIPS"].astype(str)
-    print(selected_rows['FIPS'])
-    print(selected_rows['FIPS'].dtype)
-    # tgdf = gdf_2020.merge(selected_rows, on='FIPS')
+    df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    
+    df_pov['FIPS'] = df_pov["FIPS"].astype(str)
 
-    # for i in variable:
-        # print(variable)
-    # df_UI = tgdf.loc[tgdf['F_UNINSUR'] == 1]
-    # print(type(df_UI))
-        # df_Pov = tgdf.loc[tgdf['F_POV150'] == 1]
+    if 'F_POV150' in variable:
+        return df_pov.to_json()
+
+
+@app.callback(
+    Output('ins-data', 'data'),
+    Input('tract-radio', 'value'))
+def get_tract_data(variable):
+
+    df_uninsur=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+   
+    df_uninsur['FIPS'] = df_uninsur["FIPS"].astype(str)
+   
     if 'F_UNINSUR' in variable:
-        return selected_rows.to_json()
+        return df_uninsur.to_json()
+    
 
 @app.callback(
     Output('ct-map', 'figure'),
     # Input('all-map-data', 'data'),
-    Input('variable-data', 'data'),
+    Input('pov-data', 'data'),
+    Input('ins-data', 'data'),
     Input('opacity', 'value')
 )
-def get_figure(var_data, opacity):
+def get_figure(pov_data, ins_data, opacity):
 
     fig=go.Figure()
-    if var_data:
-        tract_data = pd.read_json(var_data, dtype=False)
+    if ins_data:
+        tract_data = pd.read_json(ins_data, dtype=False)
         print(tract_data['FIPS'].dtype)
     # print(tract_data['FIPS'].unique())
     # print(type(tract_data['FIPS'][0]))
@@ -114,6 +122,34 @@ def get_figure(var_data, opacity):
                             geojson=eval(tgdf['geometry'].to_json()),
                             locations=tgdf.index,
                             z=tgdf['F_UNINSUR'],
+                            # coloraxis='coloraxis',
+                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+                            zmin=0,
+                            zmax=1,
+                            showscale=False
+                    ))
+    
+    if pov_data:
+        tract_data = pd.read_json(pov_data, dtype=False)
+        print(tract_data['FIPS'].dtype)
+    # print(tract_data['FIPS'].unique())
+    # print(type(tract_data['FIPS'][0]))
+    # tract_data['FIPS'] = tract_data["FIPS"].astype(str)
+        tgdf = gdf_2020.merge(tract_data, on='FIPS')
+    
+    # print(tract_data.columns)
+
+    # fig.add_trace(px.choropleth(
+    #     tract_data,
+    #     geojson=tract_data.features.properties.geometry,
+    #     locations=tract_data.index,
+    #     color='blue'
+    # ))
+
+        fig.add_trace(go.Choroplethmapbox(
+                            geojson=eval(tgdf['geometry'].to_json()),
+                            locations=tgdf.index,
+                            z=tgdf['F_POV150'],
                             # coloraxis='coloraxis',
                             colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
                             zmin=0,
