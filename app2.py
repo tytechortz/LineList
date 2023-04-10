@@ -111,6 +111,7 @@ def get_figure(pov_data, ins_data, opacity):
                             locations=tgdf.index,
                             z=tgdf['F_UNINSUR'],
                             # coloraxis='coloraxis',
+                            marker={'opacity':opacity},
                             colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
                             zmin=0,
                             zmax=1,
@@ -129,10 +130,11 @@ def get_figure(pov_data, ins_data, opacity):
                             locations=tgdf.index,
                             z=tgdf['F_POV150'],
                             # coloraxis='coloraxis',
-                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+                            marker={'opacity':opacity},
+                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
                             zmin=0,
                             zmax=1,
-                            showscale=False
+                            showscale=False,
                     ))
 
     fig.add_trace(go.Scattermapbox(
@@ -141,8 +143,8 @@ def get_figure(pov_data, ins_data, opacity):
                     mode='markers',
                     marker=go.scattermapbox.Marker(
                         size=10,
-                        color='red'
-                    )
+                        color='red',
+                    ),
             ))
     
 
