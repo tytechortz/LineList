@@ -15,7 +15,19 @@ template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
+gdf_2020 = gdf_2020.to_crs('WGS84')
+# gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
+gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[4:])
 case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+
+df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
+df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
+df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[4:])
+
+df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    
+df_pov['FIPS'] = df_pov["FIPS"].astype(str)
 
 
 def blank_fig(height):
@@ -55,20 +67,66 @@ app.layout = dbc.Container([
                 ),
             ], width=2),
         ]),      
-    #     dcc.Store(id='pov-data', storage_type='memory'),
-    #     dcc.Store(id='ins-data', storage_type='memory'),
+        dcc.Store(id='pov-data', storage_type='memory'),
+        dcc.Store(id='ins-data', storage_type='memory'),
     #     dcc.Store(id='case-data', storage_type='memory'),
 ])  
+
+@app.callback(
+    Output('pov-data', 'data'),
+    Input('tract-radio', 'value'))
+def get_tract_data(variable):
+
+    df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    
+    df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+
+    if 'F_POV150' in variable:
+        return df_pov.to_json()
+
+
+@app.callback(
+    Output('ins-data', 'data'),
+    Input('tract-radio', 'value'))
+def get_tract_data(variable):
+
+    df_uninsur=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+   
+    df_uninsur['FIPS'] = df_uninsur["FIPS"].astype(str)
+   
+    if 'F_UNINSUR' in variable:
+        return df_uninsur.to_json()
 
 
 @app.callback(
     Output('ct-map', 'figure'),
     Input('tract-radio', 'value'),
-    Input('opacity', 'value'))
-def get_figure(variable, opacity):
+    Input('opacity', 'value'),
+    Input('pov-data', 'data'))
+def get_figure(variable, opacity, pov):
 
+    
+
+    
 
     fig=go.Figure()
+    if variable:
+        df_pov = pd.read_json(pov)
+        df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1] 
+        df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+        tgdf = gdf_2020.merge(df_pov, on='FIPS')
+        for i in variable:
+            fig.add_trace(go.Choroplethmapbox(
+                geojson=eval(tgdf['geometry'].to_json()),
+                                locations=tgdf.index,
+                                z=tgdf['F_POV150'],
+                                # coloraxis='coloraxis',
+                                marker={'opacity':opacity},
+                                colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
+                                zmin=0,
+                                zmax=1,
+                                showscale=False,
+            ))
     
 
     fig.add_trace(go.Scattermapbox(
