@@ -119,6 +119,7 @@ def get_figure(variable, opacity, pov, ins):
             # df_pov['FIPS'] = df_pov["FIPS"].astype(str)
             # df_ins = pd.read_json(ins)
             # df_ins['FIPS'] = df_ins["FIPS"].astype(str)
+            colors = {'F_POV150': 'lightblue', 'F_UNINSUR': 'lightgreen'}
             for i in variable:
                 
                 df=df_SVI_2020.loc[df_SVI_2020[i]==1] 
@@ -129,7 +130,7 @@ def get_figure(variable, opacity, pov, ins):
                                     z=tgdf[i],
                                     # coloraxis='coloraxis',
                                     marker={'opacity':opacity},
-                                    colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
+                                    colorscale=([0,'rgba(0,0,0,0)'],[1, colors[i]]),
                                     zmin=0,
                                     zmax=1,
                                     showscale=False,
