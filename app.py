@@ -49,44 +49,44 @@ app.layout = dbc.Container([
     header,
     dbc.Row(dcc.Graph(id='ct-map', figure=blank_fig(500))),
     dbc.Row([
-            dbc.Col([
-                dcc.Slider(0, 1, value=1,
-                    marks={
-                        0: {'label': 'Light', 'style': {'color': 'white'}},
-                        1: {'label': 'Dark', 'style': {'color': 'white'}},
-                    },
-                    id = 'opacity',
-                ),
-            ], width=2),
-            dbc.Col([
-                dcc.RadioItems(
-                    id='category-radio',
-                    options=[
-                        {'label': 'Total', 'value': 'E_'},
-                        {'label': 'Pct.', 'value': 'EP_'},
-                        {'label': 'Percentile', 'value': 'EPL_'},
-                        {'label': 'Flag', 'value': 'F_'},
-                    ],
-                    value='F_' 
-                ),
-            ], width=2),
-            dbc.Col([
-                dcc.Checklist(
-                    id='tract-radio',
-                    options=[
-                        {'label': 'Uninsured', 'value': 'F_UNINSUR'},
-                        {'label': 'Poverty', 'value': 'F_POV150'},
-                    ],
-                ),
-            ], width=2),
-            # dbc.Col([
-            #     dcc.Dropdown(
-            #         id='variable-dropdown',
-            #         multi=True
-            #     ),
-            # ], width=2)
-        ]),
-        dcc.Store(id='all-map-data', storage_type='session'),
+        dbc.Col([
+            dcc.Slider(0, 1, value=1,
+                marks={
+                    0: {'label': 'Light', 'style': {'color': 'white'}},
+                    1: {'label': 'Dark', 'style': {'color': 'white'}},
+                },
+                id = 'opacity',
+            ),
+        ], width=2),
+        dbc.Col([
+            dcc.RadioItems(
+                id='category-radio',
+                options=[
+                    {'label': 'Total', 'value': 'E_'},
+                    {'label': 'Pct.', 'value': 'EP_'},
+                    {'label': 'Percentile', 'value': 'EPL_'},
+                    {'label': 'Flag', 'value': 'F_'},
+                ],
+                value='F_' 
+            ),
+        ], width=2),
+        dbc.Col([
+            dcc.Checklist(
+                id='tract-radio',
+                options=[
+                    {'label': 'Uninsured', 'value': 'F_UNINSUR'},
+                    {'label': 'Poverty', 'value': 'F_POV150'},
+                ],
+            ),
+        ], width=2),
+        # dbc.Col([
+        #     dcc.Dropdown(
+        #         id='variable-dropdown',
+        #         multi=True
+        #     ),
+        # ], width=2)
+    ]),
+    dcc.Store(id='all-map-data', storage_type='session'),
 ])
 
 # @app.callback(

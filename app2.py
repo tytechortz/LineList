@@ -4,6 +4,7 @@ import geopandas as gpd
 import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
+from shapely.geometry import Point
 
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -23,6 +24,12 @@ df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
 df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[4:])
 
 df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+
+df_uninsur = df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+df_uninsur['FIPS'] = df_uninsur["FIPS"].astype(str)
+
+df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1] 
+df_pov['FIPS'] = df_pov["FIPS"].astype(str)
 
 def blank_fig(height):
     """
@@ -63,7 +70,35 @@ app.layout = dbc.Container([
         ]),      
         dcc.Store(id='pov-data', storage_type='memory'),
         dcc.Store(id='ins-data', storage_type='memory'),
+        dcc.Store(id='case-data', storage_type='memory'),
 ])  
+
+@app.callback(
+    Output('case-data', 'data'),
+    Input('tract-radio', 'value'))
+    # Input('pov-data', 'data'),
+    # Input('ins-data', 'data'))
+def get_data(variable):
+    # print(variable)
+    # ins_tract_data = pd.read_json(ins_data, dtype=False)
+    # print(list(ins_tract_data.columns))
+    # print(ins_tract_data)
+    ins_df = gdf_2020.merge(df_uninsur, on='FIPS')
+    # print(ins_df)
+
+    df['coordinates'] = list(zip(df.geocoded_longitude, df.geocoded_latitude))
+    df['coordinates'] = df['coordinates'].apply(Point)
+
+    # ins_df['coordinates'] = list(zip(ins_df.geocoded_longitude, ins_df.geocoded_latitude))
+    # ins_df['coordinates'] = ins_df['coordinates'].apply(Point)
+    df_ins = gpd.GeoDataFrame(df, geometry='coordinates')
+    
+    # df2 = gpd.GeoDataFrame(df, geometry='coordinates')
+    df1 = gpd.sjoin(ins_df, df_ins)
+    # print(df1)
+    
+   
+    return df1.to_json()
 
 @app.callback(
     Output('pov-data', 'data'),
@@ -95,51 +130,57 @@ def get_tract_data(variable):
     Output('ct-map', 'figure'),
     Input('pov-data', 'data'),
     Input('ins-data', 'data'),
-    Input('opacity', 'value')
-)
-def get_figure(pov_data, ins_data, opacity):
+    Input('tract-radio', 'value'),
+    Input('opacity', 'value'),
+    Input('case-data', 'data'))
+def get_figure(variable, pov_data, ins_data, opacity, case_data):
 
+
+    case_df = pd.read_json(case_data)
+    print(case_data)
     fig=go.Figure()
-    if ins_data:
-        tract_data = pd.read_json(ins_data, dtype=False)
+    # if 'F_UNINSUR' in variable:
+        
+    #     tract_data = df_uninsur
    
-        tgdf = gdf_2020.merge(tract_data, on='FIPS')
+    #     tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
     
-        fig.add_trace(go.Choroplethmapbox(
-                            geojson=eval(tgdf['geometry'].to_json()),
-                            locations=tgdf.index,
-                            z=tgdf['F_UNINSUR'],
-                            # coloraxis='coloraxis',
-                            marker={'opacity':opacity},
-                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
-                            zmin=0,
-                            zmax=1,
-                            showscale=False
-                    ))
+    #     fig.add_trace(go.Choroplethmapbox(
+    #                         geojson=eval(tgdf['geometry'].to_json()),
+    #                         locations=tgdf.index,
+    #                         z=tgdf['F_UNINSUR'],
+    #                         # coloraxis='coloraxis',
+    #                         marker={'opacity':opacity},
+    #                         colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightgreen']),
+    #                         zmin=0,
+    #                         zmax=1,
+    #                         showscale=False
+    #                 ))
     
-    if pov_data:
-        tract_data = pd.read_json(pov_data, dtype=False)
-        print(tract_data['FIPS'].dtype)
+    # if 'F_POV150' in variable:
+
+    #     tract_data = df_pov
+    #     print(tract_data['FIPS'].dtype)
    
-        tgdf = gdf_2020.merge(tract_data, on='FIPS')
+    #     tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
 
-        fig.add_trace(go.Choroplethmapbox(
-                            geojson=eval(tgdf['geometry'].to_json()),
-                            locations=tgdf.index,
-                            z=tgdf['F_POV150'],
-                            # coloraxis='coloraxis',
-                            marker={'opacity':opacity},
-                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
-                            zmin=0,
-                            zmax=1,
-                            showscale=False,
-                    ))
+    #     fig.add_trace(go.Choroplethmapbox(
+    #                         geojson=eval(tgdf['geometry'].to_json()),
+    #                         locations=tgdf.index,
+    #                         z=tgdf['F_POV150'],
+    #                         # coloraxis='coloraxis',
+    #                         marker={'opacity':opacity},
+    #                         colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
+    #                         zmin=0,
+    #                         zmax=1,
+    #                         showscale=False,
+    #                 ))
 
     fig.add_trace(go.Scattermapbox(
-                    lat=df['geocoded_latitude'],
-                    lon=df['geocoded_longitude'],
+                    lat=case_df['geocoded_latitude'],
+                    lon=case_df['geocoded_longitude'],
                     mode='markers',
                     marker=go.scattermapbox.Marker(
                         size=10,
