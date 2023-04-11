@@ -13,6 +13,11 @@ header = html.Div("Arapahoe Covid-19 Case Investigation Tool", className="h2 p-2
 bgcolor = "#f3f3f1"  # mapbox light map land color
 template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
+
+gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
+case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+
+
 def blank_fig(height):
     """
     Build blank figure with the requested height
@@ -29,31 +34,67 @@ def blank_fig(height):
 
 app.layout = dbc.Container([
     header,
-    # dbc.Row(dcc.Graph(id='ct-map', figure=blank_fig(500))),
-    # dbc.Row([
-    #         dbc.Col([
-    #             dcc.Slider(0, 1, value=1,
-    #                 marks={
-    #                     0: {'label': 'Light', 'style': {'color': 'white'}},
-    #                     1: {'label': 'Dark', 'style': {'color': 'white'}},
-    #                 },
-    #                 id = 'opacity',
-    #             ),
-    #         ], width=2),
-    #         dbc.Col([
-    #             dcc.Checklist(
-    #                 id='tract-radio',
-    #                 options=[
-    #                     {'label': 'Uninsured', 'value': 'F_UNINSUR'},
-    #                     {'label': 'Poverty', 'value': 'F_POV150'},
-    #                 ],
-    #             ),
-    #         ], width=2),
-    #     ]),      
+    dbc.Row(dcc.Graph(id='ct-map', figure=blank_fig(500))),
+    dbc.Row([
+            dbc.Col([
+                dcc.Slider(0, 1, value=1,
+                    marks={
+                        0: {'label': 'Light', 'style': {'color': 'white'}},
+                        1: {'label': 'Dark', 'style': {'color': 'white'}},
+                    },
+                    id = 'opacity',
+                ),
+            ], width=2),
+            dbc.Col([
+                dcc.Checklist(
+                    id='tract-radio',
+                    options=[
+                        {'label': 'Uninsured', 'value': 'F_UNINSUR'},
+                        {'label': 'Poverty', 'value': 'F_POV150'},
+                    ],
+                ),
+            ], width=2),
+        ]),      
     #     dcc.Store(id='pov-data', storage_type='memory'),
     #     dcc.Store(id='ins-data', storage_type='memory'),
     #     dcc.Store(id='case-data', storage_type='memory'),
 ])  
+
+
+@app.callback(
+    Output('ct-map', 'figure'),
+    Input('tract-radio', 'value'),
+    Input('opacity', 'value'))
+def get_figure(variable, opacity):
+
+
+    fig=go.Figure()
+    
+
+    fig.add_trace(go.Scattermapbox(
+                    lat=case_df['geocoded_latitude'],
+                    lon=case_df['geocoded_longitude'],
+                    mode='markers',
+                    marker=go.scattermapbox.Marker(
+                        size=10,
+                        color='red',
+                    ),
+            ))
+    
+
+
+    fig.update_layout(mapbox_style="carto-positron", 
+                        mapbox_zoom=10.4,
+                        #   mapbox_layers=layer,
+                        mapbox_center={"lat": 39.65, "lon": -104.8},
+                        margin={"r":0,"t":0,"l":0,"b":0},
+                        uirevision='constant',
+                        ),
+
+
+    return fig
+
+
 
 if __name__ == "__main__":
     app.run_server(debug=True, port=8050)
