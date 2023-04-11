@@ -29,6 +29,10 @@ df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
     
 df_pov['FIPS'] = df_pov["FIPS"].astype(str)
 
+df_uninsur=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+   
+df_uninsur['FIPS'] = df_uninsur["FIPS"].astype(str)
+
 
 def blank_fig(height):
     """
@@ -102,31 +106,34 @@ def get_tract_data(variable):
     Output('ct-map', 'figure'),
     Input('tract-radio', 'value'),
     Input('opacity', 'value'),
-    Input('pov-data', 'data'))
-def get_figure(variable, opacity, pov):
-
+    Input('pov-data', 'data'),
+    Input('ins-data', 'data'))
+def get_figure(variable, opacity, pov, ins):
+    print(variable)
     
-
-    
-
     fig=go.Figure()
+    
     if variable:
-        df_pov = pd.read_json(pov)
-        df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1] 
-        df_pov['FIPS'] = df_pov["FIPS"].astype(str)
-        tgdf = gdf_2020.merge(df_pov, on='FIPS')
-        for i in variable:
-            fig.add_trace(go.Choroplethmapbox(
-                geojson=eval(tgdf['geometry'].to_json()),
-                                locations=tgdf.index,
-                                z=tgdf['F_POV150'],
-                                # coloraxis='coloraxis',
-                                marker={'opacity':opacity},
-                                colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
-                                zmin=0,
-                                zmax=1,
-                                showscale=False,
-            ))
+        if any(x in variable for x in ['F_POV150', 'F_UNINSUR']):
+            # df_pov = pd.read_json(pov)
+            # df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+            # df_ins = pd.read_json(ins)
+            # df_ins['FIPS'] = df_ins["FIPS"].astype(str)
+            for i in variable:
+                
+                df=df_SVI_2020.loc[df_SVI_2020[i]==1] 
+                tgdf = gdf_2020.merge(df, on='FIPS')
+                fig.add_trace(go.Choroplethmapbox(
+                    geojson=eval(tgdf['geometry'].to_json()),
+                                    locations=tgdf.index,
+                                    z=tgdf[i],
+                                    # coloraxis='coloraxis',
+                                    marker={'opacity':opacity},
+                                    colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
+                                    zmin=0,
+                                    zmax=1,
+                                    showscale=False,
+                ))
     
 
     fig.add_trace(go.Scattermapbox(
