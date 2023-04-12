@@ -20,7 +20,7 @@ case_df['FIPS'] = case_df["FIPS"].astype(str)
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020 = gdf_2020.to_crs('WGS84')
-# gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
+gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[4:])
 print(gdf_2020.columns)
 
@@ -90,8 +90,8 @@ app.layout = dbc.Container([
             (grid),
         ], width=12)
     ]),     
-    # dcc.Store(id='pov-data', storage_type='memory'),
-    # dcc.Store(id='ins-data', storage_type='memory'),
+    dcc.Store(id='pov-data', storage_type='memory'),
+    dcc.Store(id='ins-data', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
 
@@ -99,9 +99,15 @@ app.layout = dbc.Container([
     Output('ct-map', 'figure'),
     Input('datatable-interactivity', 'virtualRowData'),
     Input('tract-radio', 'value'),
-    Input('opacity', 'value'))
-def get_figure(rows, variable, opacity):
-    
+    Input('opacity', 'value'),
+    Input('pov-data', 'data'),
+    Input('ins-data', 'data'))
+def get_figure(rows, variable, opacity, pov, ins):
+
+    if pov:
+        tracts = pd.read_json(pov, dtype=False)
+        pov_tracts = tracts['FIPS']
+        print(pov_tracts)
 
     case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
     case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
@@ -111,22 +117,15 @@ def get_figure(rows, variable, opacity):
     
     var_data = gpd.sjoin(case_gdf, gdf_2020)
 
+
     
     df = case_df if rows is None else pd.DataFrame(rows)
-    print(var_data)
+    # print(var_data.columns)
     
     fig=go.Figure()
     
         
-    fig.add_trace(go.Scattermapbox(
-                            lat=case_gdf['geocoded_latitude'],
-                            lon=case_gdf['geocoded_longitude'],
-                            mode='markers',
-                            marker=go.scattermapbox.Marker(
-                                size=10,
-                                color='red',
-                            ),
-                    ))
+    
 
 
     if variable:
@@ -148,6 +147,16 @@ def get_figure(rows, variable, opacity):
                                 zmax=1,
                                 showscale=False,
             ))
+
+    fig.add_trace(go.Scattermapbox(
+                            lat=case_gdf['geocoded_latitude'],
+                            lon=case_gdf['geocoded_longitude'],
+                            mode='markers',
+                            marker=go.scattermapbox.Marker(
+                                size=10,
+                                color='red',
+                            ),
+                    ))
     
 
 
@@ -161,6 +170,31 @@ def get_figure(rows, variable, opacity):
 
 
     return fig
+
+@app.callback(
+    Output('pov-data', 'data'),
+    Input('tract-radio', 'value'))
+def get_tract_data(variable):
+
+    df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    
+    df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+
+    if 'F_POV150' in variable:
+        return df_pov.to_json()
+
+
+# @app.callback(
+#     Output('ins-data', 'data'),
+#     Input('tract-radio', 'value'))
+# def get_tract_data(variable):
+
+#     df_uninsur=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+   
+#     df_uninsur['FIPS'] = df_uninsur["FIPS"].astype(str)
+   
+#     if 'F_UNINSUR' in variable:
+#         return df_uninsur.to_json()
 
 
 
