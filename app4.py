@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from shapely.geometry import Point
 import dash_ag_grid as dag
 import os
+import numpy as np
 
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -104,18 +105,24 @@ app.layout = dbc.Container([
     Input('ins-data', 'data'))
 def get_figure(rows, variable, opacity, pov, ins):
 
-    if pov:
-        tracts = pd.read_json(pov, dtype=False)
-        pov_tracts = tracts['FIPS']
-        print(pov_tracts)
+    df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+
+
+    # tracts = pd.read_json(pov, dtype=False)
+    pov_tracts = df_pov['FIPS']
+    pov_tracts = pov_tracts.to_list()
+    print(pov_tracts)
 
     case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
     case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
+    # case_df['POV'] = case_df['FIPS'].apply(lambda x: any([k in x for k in pov_tracts]))
+    case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
     case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
     # tgdf = gdf_2020.merge(case_gdf, on='FIPS')
     # print(tgdf.columns)
-    
-    var_data = gpd.sjoin(case_gdf, gdf_2020)
+    print(case_gdf['POV'])
+    # var_data = gpd.sjoin(case_gdf, gdf_2020)
 
 
     
