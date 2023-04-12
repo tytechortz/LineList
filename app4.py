@@ -88,13 +88,21 @@ app.layout = dbc.Container([
     # Input('datatable-interactivity', 'selectedRows'))
 def get_figure(rows):
     
-
-    print(rows)
+    df = case_df if rows is None else pd.DataFrame(rows)
+    print(df)
     
     fig=go.Figure()
     
         
-  
+    fig.add_trace(go.Scattermapbox(
+                            lat=rows['geocoded_latitude'],
+                            lon=case_df['geocoded_longitude'],
+                            mode='markers',
+                            marker=go.scattermapbox.Marker(
+                                size=10,
+                                color='red',
+                            ),
+                    ))
     
 
 
