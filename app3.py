@@ -73,8 +73,20 @@ app.layout = dbc.Container([
         ]),      
         dcc.Store(id='pov-data', storage_type='memory'),
         dcc.Store(id='ins-data', storage_type='memory'),
-    #     dcc.Store(id='case-data', storage_type='memory'),
+        dcc.Store(id='case-data', storage_type='memory'),
 ])  
+
+# @app.callback(
+#     Output('case-data', 'data'),
+#     Input('tract-radio', 'value'))
+# def get_tract_data(variable):
+
+#     df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    
+#     df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+
+#     if 'F_POV150' in variable:
+#         return df_pov.to_json()
 
 @app.callback(
     Output('pov-data', 'data'),
@@ -112,8 +124,12 @@ def get_figure(variable, opacity, pov, ins):
     print(variable)
     
     fig=go.Figure()
+    print(case_df.columns)
+    
+        
     
     if variable:
+        
         if any(x in variable for x in ['F_POV150', 'F_UNINSUR']):
             # df_pov = pd.read_json(pov)
             # df_pov['FIPS'] = df_pov["FIPS"].astype(str)
@@ -135,17 +151,33 @@ def get_figure(variable, opacity, pov, ins):
                                     zmax=1,
                                     showscale=False,
                 ))
-    
+            for i in variable:
+                case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
+                case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
+                case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates')
+                var_data = gpd.sjoin(case_gdf, tgdf)
+                print(var_data)
 
-    fig.add_trace(go.Scattermapbox(
-                    lat=case_df['geocoded_latitude'],
-                    lon=case_df['geocoded_longitude'],
-                    mode='markers',
-                    marker=go.scattermapbox.Marker(
-                        size=10,
-                        color='red',
-                    ),
-            ))
+                fig.add_trace(go.Scattermapbox(
+                                lat=var_data['geocoded_latitude'],
+                                lon=var_data['geocoded_longitude'],
+                                mode='markers',
+                                marker=go.scattermapbox.Marker(
+                                    size=10,
+                                    color='red',
+                                ),
+                        ))
+                
+    else:
+        fig.add_trace(go.Scattermapbox(
+                            lat=case_df['geocoded_latitude'],
+                            lon=case_df['geocoded_longitude'],
+                            mode='markers',
+                            marker=go.scattermapbox.Marker(
+                                size=10,
+                                color='red',
+                            ),
+                    ))
     
 
 
