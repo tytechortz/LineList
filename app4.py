@@ -30,24 +30,23 @@ def blank_fig(height):
         },
     }
 
-defaultColDef = {
-    "filter": True,
-    "resizable": True,
-    "sortable": True,
-    "editable": False,
-    "floatingFilter": True,
-    "minWidth": 125,
-    # "cellStyle": cellStyle,
-}
+# defaultColDef = {
+#     "filter": True,
+#     "resizable": True,
+#     "sortable": True,
+#     "editable": False,
+#     "floatingFilter": True,
+#     "minWidth": 125,
+#     # "cellStyle": cellStyle,
+# }
 
 grid = dag.AgGrid(
-    id="portfolio-grid",
-    className="ag-theme-alpine-dark",
+    id="datatable-interactivity",
     columnDefs=[{"headerName": i, "field": i} for i in case_df.columns],
     rowData=case_df.to_dict("records"),
-    columnSize="sizeToFit",
-    defaultColDef=defaultColDef,
-    dashGridOptions={"undoRedoCellEditing": True, "rowSelection": "single"},
+    dashGridOptions={"rowSelection": "multiple"},
+    # columnSize="sizeToFit",
+    defaultColDef={"resizable": True, "sortable": True, "filter": True},  
 )
 
 app.layout = dbc.Container([
@@ -82,6 +81,36 @@ app.layout = dbc.Container([
     dcc.Store(id='ins-data', storage_type='memory'),
     dcc.Store(id='case-data', storage_type='memory'),
 ])    
+
+@app.callback(
+    Output('ct-map', 'figure'),
+    Input('datatable-interactivity', 'virtualRowData'))
+    # Input('datatable-interactivity', 'selectedRows'))
+def get_figure(rows):
+    
+
+    print(rows)
+    
+    fig=go.Figure()
+    
+        
+  
+    
+
+
+    fig.update_layout(mapbox_style="carto-positron", 
+                        mapbox_zoom=10.4,
+                        #   mapbox_layers=layer,
+                        mapbox_center={"lat": 39.65, "lon": -104.8},
+                        margin={"r":0,"t":0,"l":0,"b":0},
+                        uirevision='constant',
+                        ),
+
+
+    return fig
+
+
+
 
 if __name__ == "__main__":
     app.run_server(debug=True, port=8050)
