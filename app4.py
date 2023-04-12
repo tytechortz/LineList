@@ -13,6 +13,9 @@ header = html.Div("Arapahoe Covid-19 Case Investigation Tool", className="h2 p-2
 bgcolor = "#f3f3f1"  # mapbox light map land color
 template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
+
+case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+
 def blank_fig(height):
     """
     Build blank figure with the requested height
@@ -27,14 +30,34 @@ def blank_fig(height):
         },
     }
 
+defaultColDef = {
+    "filter": True,
+    "resizable": True,
+    "sortable": True,
+    "editable": False,
+    "floatingFilter": True,
+    "minWidth": 125,
+    # "cellStyle": cellStyle,
+}
+
+grid = dag.AgGrid(
+    id="portfolio-grid",
+    className="ag-theme-alpine-dark",
+    columnDefs=[{"headerName": i, "field": i} for i in case_df.columns],
+    rowData=case_df.to_dict("records"),
+    columnSize="sizeToFit",
+    defaultColDef=defaultColDef,
+    dashGridOptions={"undoRedoCellEditing": True, "rowSelection": "single"},
+)
+
 app.layout = dbc.Container([
     header,
     dbc.Row(dcc.Graph(id='ct-map', figure=blank_fig(500))),
-    # dbc.Row([
-    #     dbc.Col([
-    #         (grid),
-    #     ], width=12)
-    # ]),     
+    dbc.Row([
+        dbc.Col([
+            (grid),
+        ], width=12)
+    ]),     
     dcc.Store(id='pov-data', storage_type='memory'),
     dcc.Store(id='ins-data', storage_type='memory'),
     dcc.Store(id='case-data', storage_type='memory'),
