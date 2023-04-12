@@ -135,22 +135,22 @@ def get_figure(variable, opacity, pov, ins):
                                     zmax=1,
                                     showscale=False,
                 ))
-            for i in variable:
-                case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
-                case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
-                case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates')
-                var_data = gpd.sjoin(case_gdf, tgdf)
-                print(var_data)
+            # for i in variable:
+            case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
+            case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
+            case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates')
+            var_data = gpd.sjoin(case_gdf, tgdf)
+            print(var_data)
 
-                fig.add_trace(go.Scattermapbox(
-                                lat=var_data['geocoded_latitude'],
-                                lon=var_data['geocoded_longitude'],
-                                mode='markers',
-                                marker=go.scattermapbox.Marker(
-                                    size=10,
-                                    color='red',
-                                ),
-                        ))
+            fig.add_trace(go.Scattermapbox(
+                            lat=var_data['geocoded_latitude'],
+                            lon=var_data['geocoded_longitude'],
+                            mode='markers',
+                            marker=go.scattermapbox.Marker(
+                                size=10,
+                                color='red',
+                            ),
+                    ))
                 
     else:
         fig.add_trace(go.Scattermapbox(
