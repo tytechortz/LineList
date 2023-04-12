@@ -105,9 +105,10 @@ def get_figure(rows, variable, opacity):
 
     case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
     case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
-    case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates')
+    case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
     # tgdf = gdf_2020.merge(case_gdf, on='FIPS')
     # print(tgdf.columns)
+    
     var_data = gpd.sjoin(case_gdf, gdf_2020)
 
     
