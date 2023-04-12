@@ -76,17 +76,6 @@ app.layout = dbc.Container([
         dcc.Store(id='case-data', storage_type='memory'),
 ])  
 
-# @app.callback(
-#     Output('case-data', 'data'),
-#     Input('tract-radio', 'value'))
-# def get_tract_data(variable):
-
-#     df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
-    
-#     df_pov['FIPS'] = df_pov["FIPS"].astype(str)
-
-#     if 'F_POV150' in variable:
-#         return df_pov.to_json()
 
 @app.callback(
     Output('pov-data', 'data'),
@@ -121,20 +110,15 @@ def get_tract_data(variable):
     Input('pov-data', 'data'),
     Input('ins-data', 'data'))
 def get_figure(variable, opacity, pov, ins):
-    print(variable)
+    
     
     fig=go.Figure()
-    print(case_df.columns)
     
         
-    
     if variable:
         
         if any(x in variable for x in ['F_POV150', 'F_UNINSUR']):
-            # df_pov = pd.read_json(pov)
-            # df_pov['FIPS'] = df_pov["FIPS"].astype(str)
-            # df_ins = pd.read_json(ins)
-            # df_ins['FIPS'] = df_ins["FIPS"].astype(str)
+          
             colors = {'F_POV150': 'lightblue', 'F_UNINSUR': 'lightgreen'}
             for i in variable:
                 
@@ -191,7 +175,6 @@ def get_figure(variable, opacity, pov, ins):
 
 
     return fig
-
 
 
 if __name__ == "__main__":
