@@ -158,25 +158,25 @@ def get_figure(variable, pov_data, ins_data, opacity, case_data):
     #                         showscale=False
     #                 ))
     
-    # if 'F_POV150' in variable:
+    if 'F_POV150' in variable:
 
-    #     tract_data = df_pov
-    #     print(tract_data['FIPS'].dtype)
+        tract_data = df_pov
+        print(tract_data['FIPS'].dtype)
    
-    #     tgdf = gdf_2020.merge(tract_data, on='FIPS')
+        tgdf = gdf_2020.merge(tract_data, on='FIPS')
     
 
-    #     fig.add_trace(go.Choroplethmapbox(
-    #                         geojson=eval(tgdf['geometry'].to_json()),
-    #                         locations=tgdf.index,
-    #                         z=tgdf['F_POV150'],
-    #                         # coloraxis='coloraxis',
-    #                         marker={'opacity':opacity},
-    #                         colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
-    #                         zmin=0,
-    #                         zmax=1,
-    #                         showscale=False,
-    #                 ))
+        fig.add_trace(go.Choroplethmapbox(
+                            geojson=eval(tgdf['geometry'].to_json()),
+                            locations=tgdf.index,
+                            z=tgdf['F_POV150'],
+                            # coloraxis='coloraxis',
+                            marker={'opacity':opacity},
+                            colorscale=([0,'rgba(0,0,0,0)'],[1, 'lightblue']),
+                            zmin=0,
+                            zmax=1,
+                            showscale=False,
+                    ))
 
     fig.add_trace(go.Scattermapbox(
                     lat=case_df['geocoded_latitude'],
