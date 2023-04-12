@@ -77,15 +77,14 @@ app.layout = dbc.Container([
             (grid),
         ], width=12)
     ]),     
-    dcc.Store(id='pov-data', storage_type='memory'),
-    dcc.Store(id='ins-data', storage_type='memory'),
-    dcc.Store(id='case-data', storage_type='memory'),
+    # dcc.Store(id='pov-data', storage_type='memory'),
+    # dcc.Store(id='ins-data', storage_type='memory'),
+    # dcc.Store(id='case-data', storage_type='memory'),
 ])    
 
 @app.callback(
     Output('ct-map', 'figure'),
     Input('datatable-interactivity', 'virtualRowData'))
-    # Input('datatable-interactivity', 'selectedRows'))
 def get_figure(rows):
     
     df = case_df if rows is None else pd.DataFrame(rows)
@@ -95,8 +94,8 @@ def get_figure(rows):
     
         
     fig.add_trace(go.Scattermapbox(
-                            lat=rows['geocoded_latitude'],
-                            lon=case_df['geocoded_longitude'],
+                            lat=df['geocoded_latitude'],
+                            lon=df['geocoded_longitude'],
                             mode='markers',
                             marker=go.scattermapbox.Marker(
                                 size=10,
