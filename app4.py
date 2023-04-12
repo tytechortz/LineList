@@ -15,11 +15,14 @@ template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
 
 case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+case_df.rename(columns={'tract2000': 'FIPS'}, inplace=True)
+case_df['FIPS'] = case_df["FIPS"].astype(str)
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020 = gdf_2020.to_crs('WGS84')
 # gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[4:])
+print(gdf_2020.columns)
 
 df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
 df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
@@ -103,18 +106,20 @@ def get_figure(rows, variable, opacity):
     case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
     case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
     case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates')
-    # var_data = gpd.sjoin(case_gdf, tgdf)
+    # tgdf = gdf_2020.merge(case_gdf, on='FIPS')
+    # print(tgdf.columns)
+    var_data = gpd.sjoin(case_gdf, gdf_2020)
 
     
     df = case_df if rows is None else pd.DataFrame(rows)
-    print(df)
+    print(var_data)
     
     fig=go.Figure()
     
         
     fig.add_trace(go.Scattermapbox(
-                            lat=df['geocoded_latitude'],
-                            lon=df['geocoded_longitude'],
+                            lat=case_gdf['geocoded_latitude'],
+                            lon=case_gdf['geocoded_longitude'],
                             mode='markers',
                             marker=go.scattermapbox.Marker(
                                 size=10,
