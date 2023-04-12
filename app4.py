@@ -16,6 +16,16 @@ template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
 case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 
+gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
+gdf_2020 = gdf_2020.to_crs('WGS84')
+# gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
+gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[4:])
+
+df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
+df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
+df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[4:])
+
 def blank_fig(height):
     """
     Build blank figure with the requested height
@@ -84,8 +94,17 @@ app.layout = dbc.Container([
 
 @app.callback(
     Output('ct-map', 'figure'),
-    Input('datatable-interactivity', 'virtualRowData'))
-def get_figure(rows):
+    Input('datatable-interactivity', 'virtualRowData'),
+    Input('tract-radio', 'value'),
+    Input('opacity', 'value'))
+def get_figure(rows, variable, opacity):
+    
+
+    case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
+    case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
+    case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates')
+    # var_data = gpd.sjoin(case_gdf, tgdf)
+
     
     df = case_df if rows is None else pd.DataFrame(rows)
     print(df)
@@ -102,6 +121,27 @@ def get_figure(rows):
                                 color='red',
                             ),
                     ))
+
+
+    if variable:
+        for i in variable:
+            colors = {'F_POV150': 'lightblue', 'F_UNINSUR': 'lightgreen'}
+            df=df_SVI_2020.loc[df_SVI_2020[i]==1] 
+            tgdf = gdf_2020.merge(df, on='FIPS')
+
+            df=df_SVI_2020.loc[df_SVI_2020[i]==1] 
+            tgdf = gdf_2020.merge(df, on='FIPS')
+            fig.add_trace(go.Choroplethmapbox(
+                geojson=eval(tgdf['geometry'].to_json()),
+                                locations=tgdf.index,
+                                z=tgdf[i],
+                                # coloraxis='coloraxis',
+                                marker={'opacity':opacity},
+                                colorscale=([0,'rgba(0,0,0,0)'],[1, colors[i]]),
+                                zmin=0,
+                                zmax=1,
+                                showscale=False,
+            ))
     
 
 
