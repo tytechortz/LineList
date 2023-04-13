@@ -128,7 +128,8 @@ def get_figure(rows, variable, opacity, pov, ins):
     # df_ins=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
     # df_ins['FIPS'] = df_ins['FIPS'].apply(lambda x: x[1:])
     # df_ins['FIPS'] = df_ins["FIPS"].astype(str)
-    
+    selected = pd.DataFrame(rows)
+    print(selected)
 
 
     # tracts = pd.read_json(pov, dtype=False)
@@ -139,20 +140,19 @@ def get_figure(rows, variable, opacity, pov, ins):
     # print(ins_tracts)
     # print(pov_tracts)
 
-    case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
-    case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
-    # case_df['POV'] = case_df['FIPS'].apply(lambda x: any([k in x for k in pov_tracts]))
-    # case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
-    # case_df['INS'] = np.where(case_df['FIPS'].isin(ins_tracts), 'T', 'F')
-    case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
-    # tgdf = gdf_2020.merge(case_gdf, on='FIPS')
-    # print(tgdf.columns)
-    print(case_gdf['INS'])
-    # var_data = gpd.sjoin(case_gdf, gdf_2020)
+    # case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
+    # case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
+
+    selected['Coordinates'] = list(zip(selected['geocoded_longitude'], selected['geocoded_latitude']))
+    selected['Coordinates'] = selected['Coordinates'].apply(Point)
+    
+    selected = gpd.GeoDataFrame(selected, geometry='Coordinates', crs=4326)
+    # case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
+   
 
 
     
-    df = case_df if rows is None else pd.DataFrame(rows)
+    df = selected if rows is None else pd.DataFrame(rows)
     # print(var_data.columns)
     
     fig=go.Figure()
@@ -182,8 +182,8 @@ def get_figure(rows, variable, opacity, pov, ins):
             ))
 
     fig.add_trace(go.Scattermapbox(
-                            lat=case_gdf['geocoded_latitude'],
-                            lon=case_gdf['geocoded_longitude'],
+                            lat=df['geocoded_latitude'],
+                            lon=df['geocoded_longitude'],
                             mode='markers',
                             marker=go.scattermapbox.Marker(
                                 size=10,
