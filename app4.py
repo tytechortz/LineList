@@ -14,21 +14,37 @@ header = html.Div("Arapahoe Covid-19 Case Investigation Tool", className="h2 p-2
 bgcolor = "#f3f3f1"  # mapbox light map land color
 template = {"layout": {"paper_bgcolor": bgcolor, "plot_bgcolor": bgcolor}}
 
+df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
+df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
+df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
+df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[4:])
 
+df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+df_pov['FIPS'] = df_pov['FIPS'].apply(lambda x: x[1:])
+df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+
+df_ins=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+df_ins['FIPS'] = df_ins['FIPS'].apply(lambda x: x[1:])
+df_ins['FIPS'] = df_ins["FIPS"].astype(str)
+
+pov_tracts = df_pov['FIPS']
+pov_tracts = pov_tracts.to_list()
+ins_tracts = df_ins['FIPS']
+ins_tracts = ins_tracts.to_list()
 case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
 case_df.rename(columns={'tract2000': 'FIPS'}, inplace=True)
 case_df['FIPS'] = case_df["FIPS"].astype(str)
+case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
+case_df['INS'] = np.where(case_df['FIPS'].isin(ins_tracts), 'T', 'F')
+
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020 = gdf_2020.to_crs('WGS84')
 gdf_2020['FIPS'] = gdf_2020["FIPS"].astype(str)
 gdf_2020['FIPS'] = gdf_2020['FIPS'].apply(lambda x: x[4:])
-print(gdf_2020.columns)
+# print(gdf_2020.columns)
 
-df_SVI_2020 = pd.read_csv('Colorado_SVI_2020.csv')
-df_SVI_2020 = df_SVI_2020.loc[df_SVI_2020['COUNTY'] == 'Arapahoe']
-df_SVI_2020['FIPS'] = df_SVI_2020["FIPS"].astype(str)
-df_SVI_2020['FIPS'] = df_SVI_2020['FIPS'].apply(lambda x: x[4:])
+
 
 def blank_fig(height):
     """
@@ -105,23 +121,33 @@ app.layout = dbc.Container([
     Input('ins-data', 'data'))
 def get_figure(rows, variable, opacity, pov, ins):
 
-    df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
-    df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+    # df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+    # df_pov['FIPS'] = df_pov['FIPS'].apply(lambda x: x[1:])
+    # df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+    
+    # df_ins=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
+    # df_ins['FIPS'] = df_ins['FIPS'].apply(lambda x: x[1:])
+    # df_ins['FIPS'] = df_ins["FIPS"].astype(str)
+    
 
 
     # tracts = pd.read_json(pov, dtype=False)
-    pov_tracts = df_pov['FIPS']
-    pov_tracts = pov_tracts.to_list()
-    print(pov_tracts)
+    # pov_tracts = df_pov['FIPS']
+    # pov_tracts = pov_tracts.to_list()
+    # ins_tracts = df_ins['FIPS']
+    # ins_tracts = ins_tracts.to_list()
+    # print(ins_tracts)
+    # print(pov_tracts)
 
     case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
     case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
     # case_df['POV'] = case_df['FIPS'].apply(lambda x: any([k in x for k in pov_tracts]))
-    case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
+    # case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
+    # case_df['INS'] = np.where(case_df['FIPS'].isin(ins_tracts), 'T', 'F')
     case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
     # tgdf = gdf_2020.merge(case_gdf, on='FIPS')
     # print(tgdf.columns)
-    print(case_gdf['POV'])
+    print(case_gdf['INS'])
     # var_data = gpd.sjoin(case_gdf, gdf_2020)
 
 
