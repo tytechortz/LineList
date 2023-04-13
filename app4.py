@@ -107,8 +107,8 @@ app.layout = dbc.Container([
             (grid),
         ], width=12)
     ]),     
-    dcc.Store(id='pov-data', storage_type='memory'),
-    dcc.Store(id='ins-data', storage_type='memory'),
+    # dcc.Store(id='pov-data', storage_type='memory'),
+    # dcc.Store(id='ins-data', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
 
@@ -116,10 +116,8 @@ app.layout = dbc.Container([
     Output('ct-map', 'figure'),
     Input('datatable-interactivity', 'virtualRowData'),
     Input('tract-radio', 'value'),
-    Input('opacity', 'value'),
-    Input('pov-data', 'data'),
-    Input('ins-data', 'data'))
-def get_figure(rows, variable, opacity, pov, ins):
+    Input('opacity', 'value'))
+def get_figure(rows, variable, opacity):
 
     # df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
     # df_pov['FIPS'] = df_pov['FIPS'].apply(lambda x: x[1:])
@@ -140,15 +138,15 @@ def get_figure(rows, variable, opacity, pov, ins):
     # print(ins_tracts)
     # print(pov_tracts)
 
-    # case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
-    # case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
+    case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
+    case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
 
     selected['Coordinates'] = list(zip(selected['geocoded_longitude'], selected['geocoded_latitude']))
     selected['Coordinates'] = selected['Coordinates'].apply(Point)
     
     selected = gpd.GeoDataFrame(selected, geometry='Coordinates', crs=4326)
     # case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
-   
+    # print(selected['geocoded_latitude'])
 
 
     
@@ -164,11 +162,11 @@ def get_figure(rows, variable, opacity, pov, ins):
     if variable:
         for i in variable:
             colors = {'F_POV150': 'lightblue', 'F_UNINSUR': 'lightgreen'}
-            df=df_SVI_2020.loc[df_SVI_2020[i]==1] 
-            tgdf = gdf_2020.merge(df, on='FIPS')
+            # df2=df_SVI_2020.loc[df_SVI_2020[i]==1] 
+            # tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
 
-            df=df_SVI_2020.loc[df_SVI_2020[i]==1] 
-            tgdf = gdf_2020.merge(df, on='FIPS')
+            df2=df_SVI_2020.loc[df_SVI_2020[i]==1] 
+            tgdf = gdf_2020.merge(df2, on='FIPS')
             fig.add_trace(go.Choroplethmapbox(
                 geojson=eval(tgdf['geometry'].to_json()),
                                 locations=tgdf.index,
@@ -180,6 +178,7 @@ def get_figure(rows, variable, opacity, pov, ins):
                                 zmax=1,
                                 showscale=False,
             ))
+
 
     fig.add_trace(go.Scattermapbox(
                             lat=df['geocoded_latitude'],
@@ -204,17 +203,17 @@ def get_figure(rows, variable, opacity, pov, ins):
 
     return fig
 
-@app.callback(
-    Output('pov-data', 'data'),
-    Input('tract-radio', 'value'))
-def get_tract_data(variable):
+# @app.callback(
+#     Output('pov-data', 'data'),
+#     Input('tract-radio', 'value'))
+# def get_tract_data(variable):
 
-    df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
+#     df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
     
-    df_pov['FIPS'] = df_pov["FIPS"].astype(str)
+#     df_pov['FIPS'] = df_pov["FIPS"].astype(str)
 
-    if 'F_POV150' in variable:
-        return df_pov.to_json()
+#     if 'F_POV150' in variable:
+#         return df_pov.to_json()
 
 
 # @app.callback(
