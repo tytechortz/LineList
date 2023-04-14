@@ -32,6 +32,7 @@ pov_tracts = pov_tracts.to_list()
 ins_tracts = df_ins['FIPS']
 ins_tracts = ins_tracts.to_list()
 case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+# print(case_df['tract2000'])
 case_df.rename(columns={'tract2000': 'FIPS'}, inplace=True)
 case_df['FIPS'] = case_df["FIPS"].astype(str)
 case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
@@ -71,12 +72,15 @@ def blank_fig(height):
 # }
 
 grid = dag.AgGrid(
-    id="datatable-interactivity",
-    columnDefs=[{"headerName": i, "field": i} for i in case_df.columns],
+    id="case-grid",
+    columnDefs=[{"headerName": i, "field": i, "editable": False} for i in case_df.columns],
     rowData=case_df.to_dict("records"),
-    dashGridOptions={"rowSelection": "multiple"},
+    dashGridOptions={"rowSelection": "muiltiple"},
     # columnSize="sizeToFit",
-    defaultColDef={"resizable": True, "sortable": True, "filter": True},  
+    defaultColDef={"resizable": True, "sortable": True, "filter": True},
+    csvExportParams={
+                "fileName": "ag_grid_test.csv",
+            },  
 )
 
 app.layout = dbc.Container([
@@ -105,65 +109,37 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             (grid),
-        ], width=12)
-    ]),     
+        ], width=12),
+        dbc.Col([
+            html.Button("Download CSV", id="csv-button", n_clicks=0),
+        ], width=2)
+    ]),    
     # dcc.Store(id='pov-data', storage_type='memory'),
     # dcc.Store(id='ins-data', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
 
+
 @app.callback(
     Output('ct-map', 'figure'),
-    Input('datatable-interactivity', 'virtualRowData'),
+    Input('case-grid', 'virtualRowData'),
+    # Input("selection-multiple-click-grid","selectedRows"),
     Input('tract-radio', 'value'),
     Input('opacity', 'value'))
-def get_figure(rows, variable, opacity):
+def get_figure(all_rows, variable, opacity):
 
-    # df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
-    # df_pov['FIPS'] = df_pov['FIPS'].apply(lambda x: x[1:])
-    # df_pov['FIPS'] = df_pov["FIPS"].astype(str)
-    
-    # df_ins=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
-    # df_ins['FIPS'] = df_ins['FIPS'].apply(lambda x: x[1:])
-    # df_ins['FIPS'] = df_ins["FIPS"].astype(str)
-    selected = pd.DataFrame(rows)
-    print(selected)
-
-
-    # tracts = pd.read_json(pov, dtype=False)
-    # pov_tracts = df_pov['FIPS']
-    # pov_tracts = pov_tracts.to_list()
-    # ins_tracts = df_ins['FIPS']
-    # ins_tracts = ins_tracts.to_list()
-    # print(ins_tracts)
-    # print(pov_tracts)
-
-    case_df['Coordinates'] = list(zip(case_df['geocoded_longitude'], case_df['geocoded_latitude']))
-    case_df['Coordinates'] = case_df['Coordinates'].apply(Point)
-
-    selected['Coordinates'] = list(zip(selected['geocoded_longitude'], selected['geocoded_latitude']))
-    selected['Coordinates'] = selected['Coordinates'].apply(Point)
-    
-    selected = gpd.GeoDataFrame(selected, geometry='Coordinates', crs=4326)
-    # case_gdf = gpd.GeoDataFrame(case_df, geometry='Coordinates', crs=4326)
-    # print(selected['geocoded_latitude'])
-
-
-    
-    df = selected if rows is None else pd.DataFrame(rows)
-    # print(var_data.columns)
+    all_rows = pd.DataFrame(all_rows)
+   
+    df = all_rows 
+   
+  
     
     fig=go.Figure()
     
         
-    
-
-
     if variable:
         for i in variable:
             colors = {'F_POV150': 'lightblue', 'F_UNINSUR': 'lightgreen'}
-            # df2=df_SVI_2020.loc[df_SVI_2020[i]==1] 
-            # tgdf = gdf_2020.merge(df_SVI_2020, on='FIPS')
 
             df2=df_SVI_2020.loc[df_SVI_2020[i]==1] 
             tgdf = gdf_2020.merge(df2, on='FIPS')
@@ -203,30 +179,13 @@ def get_figure(rows, variable, opacity):
 
     return fig
 
-# @app.callback(
-#     Output('pov-data', 'data'),
-#     Input('tract-radio', 'value'))
-# def get_tract_data(variable):
-
-#     df_pov=df_SVI_2020.loc[df_SVI_2020['F_POV150']==1]
-    
-#     df_pov['FIPS'] = df_pov["FIPS"].astype(str)
-
-#     if 'F_POV150' in variable:
-#         return df_pov.to_json()
-
-
-# @app.callback(
-#     Output('ins-data', 'data'),
-#     Input('tract-radio', 'value'))
-# def get_tract_data(variable):
-
-#     df_uninsur=df_SVI_2020.loc[df_SVI_2020['F_UNINSUR']==1]
-   
-#     df_uninsur['FIPS'] = df_uninsur["FIPS"].astype(str)
-   
-#     if 'F_UNINSUR' in variable:
-#         return df_uninsur.to_json()
+@app.callback(
+    Output("case-grid", "exportDataAsCsv"),
+    Input("csv-button", "n_clicks"))
+def export_data_as_csv(n_clicks):
+    if n_clicks:
+        return True
+    return False
 
 
 
