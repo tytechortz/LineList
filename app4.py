@@ -10,6 +10,7 @@ import os
 import numpy as np
 from urllib.request import urlopen
 import json
+import utm
 
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -220,14 +221,17 @@ def export_data_as_csv(address):
    
     stuff = '"records":[{{"attributes":{{"OBJECTID":1,"STREET":"{}"}}'.format(address)
 
-    url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=&f=pjson"
+    url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson"
     response = urlopen(url)
     data_json = json.loads(response.read())
     print(data_json)
     location= data_json['locations'][0]['location']
     print(location)
     latitude=location['y']
+    longitude=location['x']
     print(latitude)
+    # lat, lon = utm.to_latlon(latitude, longitude, 13, 'S')
+
 
 
     return address, stuff
