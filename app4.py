@@ -121,11 +121,32 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dcc.Input(
-                id='address',
+                id='number',
                 type='text',
-                placeholder='enter address'
+                placeholder='enter num'
             )
-        ], width=3),
+        ], width=2),
+        dbc.Col([
+            dcc.Input(
+                id='street',
+                type='text',
+                placeholder='enter street'
+            )
+        ], width=2),
+        dbc.Col([
+            dcc.Input(
+                id='city',
+                type='text',
+                placeholder='enter city'
+            )
+        ], width=2),
+        dbc.Col([
+            dcc.Input(
+                id='zip',
+                type='text',
+                placeholder='enter zip'
+            )
+        ], width=2),
     ]),
     dbc.Row([
         dbc.Col([
@@ -137,7 +158,7 @@ app.layout = dbc.Container([
             html.Div(id='second_formatted_address')
         ], width=3),
     ]),     
-    dcc.Store(id='address-data', storage_type='memory'),
+    dcc.Store(id='address-data', storage_type='session'),
     # dcc.Store(id='ins-data', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
@@ -154,9 +175,9 @@ def get_figure(all_rows, address, variable, opacity):
     all_rows = pd.DataFrame(all_rows)
    
     df = all_rows 
-   
+    # print(address)
     address_df = pd.DataFrame(address, columns=address.keys(), index=[0])
-    print(address_df)
+    # print(address_df)
     
     fig=go.Figure()
     
@@ -185,8 +206,8 @@ def get_figure(all_rows, address, variable, opacity):
                             lon=address_df['x'],
                             mode='markers',
                             marker=go.scattermapbox.Marker(
-                                size=10,
-                                color='red',
+                                size=15,
+                                color='blue',
                             ),
                     ))
 
@@ -224,35 +245,34 @@ def export_data_as_csv(n_clicks):
 @app.callback(
     Output("formatted_address", "children"),
     Output("address-data", "data"),
-    Input("address", "value"))
-def export_data_as_csv(address):
+    Input("number", "value"),
+    Input("street", "value"),
+    Input("city", "value"),
+    Input("zip", "value"))
+def export_data_as_csv(num, st, city, zip):
 
     # {"records":[{"attributes":{"OBJECTID":1,"STREET":"{}".format(address)}}]}
     # {"records":[{"attributes":{"OBJECTID":1,"STREET":"440 Arguello Blvd","ZONE":"94118"}}
-   
-    stuff = '"records":[{{"attributes":{{"OBJECTID":1,"STREET":"{}"}}'.format(address)
+    # print(address)
+    # stuff = '"records":[{{"attributes":{{"OBJECTID":1,"STREET":"{}"}}'.format(address)
 
-    url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson"
+    # url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson"
+    url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%22+{}+{}+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%22{}%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson".format(num,st,zip)
     response = urlopen(url)
     data_json = json.loads(response.read())
-    print(data_json)
+    # print(data_json)
     location= data_json['locations'][0]['location']
-    print(location)
+    # print(location)
     latitude=location['y']
     longitude=location['x']
-    print(latitude)
+    # print(latitude)
     # lat, lon = utm.to_latlon(latitude, longitude, 13, 'S')
 
 
 
     return 'Address2 {}'.format(location), location
 
-@app.callback(
-    Output("second_formatted_address", "children"),
-    Input("address-data", "data"))
-def export_data_as_csv(address):
-    
-    return u'Address {}'.format(address)
+
 
 
 
