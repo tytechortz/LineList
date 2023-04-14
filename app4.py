@@ -197,13 +197,6 @@ def export_data_as_csv(n_clicks):
     return False
 
 
-@app.callback(
-    Output("addresses", "children"),
-    Input("", "n_clicks"))
-def export_data_as_csv(n_clicks):
-    if n_clicks:
-        return True
-    return False
 
 
 
