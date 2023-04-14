@@ -180,17 +180,15 @@ def get_figure(all_rows, address, variable, opacity):
             ))
 
 
-    # fig.add_trace(go.Scattermapbox(
-    #                         lat=,
-    #                         lon=-104.793,
-    #                         # lat=address['y'],
-    #                         # lon=address['x'],
-    #                         mode='markers',
-    #                         marker=go.scattermapbox.Marker(
-    #                             size=10,
-    #                             color='red',
-    #                         ),
-    #                 ))
+    fig.add_trace(go.Scattermapbox(
+                            lat=address_df['y'],
+                            lon=address_df['x'],
+                            mode='markers',
+                            marker=go.scattermapbox.Marker(
+                                size=10,
+                                color='red',
+                            ),
+                    ))
 
     fig.add_trace(go.Scattermapbox(
                             lat=df['geocoded_latitude'],
