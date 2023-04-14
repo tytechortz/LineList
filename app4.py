@@ -146,16 +146,17 @@ app.layout = dbc.Container([
 @app.callback(
     Output('ct-map', 'figure'),
     Input('case-grid', 'virtualRowData'),
-    # Input("selection-multiple-click-grid","selectedRows"),
+    Input("address-data","data"),
     Input('tract-radio', 'value'),
     Input('opacity', 'value'))
-def get_figure(all_rows, variable, opacity):
+def get_figure(all_rows, address, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
    
     df = all_rows 
    
-  
+    address_df = pd.DataFrame(address, columns=address.keys(), index=[0])
+    print(address_df)
     
     fig=go.Figure()
     
@@ -178,6 +179,18 @@ def get_figure(all_rows, variable, opacity):
                                 showscale=False,
             ))
 
+
+    # fig.add_trace(go.Scattermapbox(
+    #                         lat=,
+    #                         lon=-104.793,
+    #                         # lat=address['y'],
+    #                         # lon=address['x'],
+    #                         mode='markers',
+    #                         marker=go.scattermapbox.Marker(
+    #                             size=10,
+    #                             color='red',
+    #                         ),
+    #                 ))
 
     fig.add_trace(go.Scattermapbox(
                             lat=df['geocoded_latitude'],
@@ -234,7 +247,7 @@ def export_data_as_csv(address):
 
 
 
-    return address, stuff
+    return 'Address2 {}'.format(location), location
 
 @app.callback(
     Output("second_formatted_address", "children"),
