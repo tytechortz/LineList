@@ -224,6 +224,10 @@ def export_data_as_csv(address):
     response = urlopen(url)
     data_json = json.loads(response.read())
     print(data_json)
+    location= data_json['locations'][0]['location']
+    print(location)
+    latitude=location['y']
+    print(latitude)
 
 
     return address, stuff
