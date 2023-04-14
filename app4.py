@@ -113,6 +113,15 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Button("Download CSV", id="csv-button", n_clicks=0),
         ], width=2)
+    ]),  
+    dbc.Row([
+        dbc.Col([
+            dcc.Input(
+                id='address',
+                type='text',
+                placeholder='enter address'
+            )
+        ], width=3),
     ]),    
     # dcc.Store(id='pov-data', storage_type='memory'),
     # dcc.Store(id='ins-data', storage_type='memory'),
@@ -187,6 +196,14 @@ def export_data_as_csv(n_clicks):
         return True
     return False
 
+
+@app.callback(
+    Output("addresses", "children"),
+    Input("", "n_clicks"))
+def export_data_as_csv(n_clicks):
+    if n_clicks:
+        return True
+    return False
 
 
 
