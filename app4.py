@@ -1,4 +1,5 @@
-from dash import Dash, html, dcc, Input, Output, ctx
+from dash import Dash, html, dcc
+from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import geopandas as gpd
 import pandas as pd
@@ -7,6 +8,8 @@ from shapely.geometry import Point
 import dash_ag_grid as dag
 import os
 import numpy as np
+from urllib.request import urlopen
+import json
 
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -122,8 +125,18 @@ app.layout = dbc.Container([
                 placeholder='enter address'
             )
         ], width=3),
-    ]),    
-    # dcc.Store(id='pov-data', storage_type='memory'),
+    ]),
+    dbc.Row([
+        dbc.Col([
+            html.Div(id='formatted_address')
+        ], width=3),
+    ]),
+    dbc.Row([
+        dbc.Col([
+            html.Div(id='second_formatted_address')
+        ], width=3),
+    ]),     
+    dcc.Store(id='address-data', storage_type='memory'),
     # dcc.Store(id='ins-data', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
@@ -195,6 +208,32 @@ def export_data_as_csv(n_clicks):
     if n_clicks:
         return True
     return False
+
+@app.callback(
+    Output("formatted_address", "children"),
+    Output("address-data", "data"),
+    Input("address", "value"))
+def export_data_as_csv(address):
+
+    # {"records":[{"attributes":{"OBJECTID":1,"STREET":"{}".format(address)}}]}
+    # {"records":[{"attributes":{"OBJECTID":1,"STREET":"440 Arguello Blvd","ZONE":"94118"}}
+   
+    stuff = '"records":[{{"attributes":{{"OBJECTID":1,"STREET":"{}"}}'.format(address)
+
+    url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=&f=pjson"
+    response = urlopen(url)
+    data_json = json.loads(response.read())
+    print(data_json)
+
+
+    return address, stuff
+
+@app.callback(
+    Output("second_formatted_address", "children"),
+    Input("address-data", "data"))
+def export_data_as_csv(address):
+    
+    return u'Address {}'.format(address)
 
 
 
