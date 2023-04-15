@@ -11,6 +11,7 @@ import numpy as np
 from urllib.request import urlopen
 import json
 import utm
+import requests
 
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -121,32 +122,11 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dcc.Input(
-                id='number',
+                id='address',
                 type='text',
-                placeholder='enter num'
+                placeholder='enter address'
             )
-        ], width=2),
-        dbc.Col([
-            dcc.Input(
-                id='street',
-                type='text',
-                placeholder='enter street'
-            )
-        ], width=2),
-        dbc.Col([
-            dcc.Input(
-                id='city',
-                type='text',
-                placeholder='enter city'
-            )
-        ], width=2),
-        dbc.Col([
-            dcc.Input(
-                id='zip',
-                type='text',
-                placeholder='enter zip'
-            )
-        ], width=2),
+        ], width=4),
     ]),
     dbc.Row([
         dbc.Col([
@@ -251,26 +231,74 @@ def export_data_as_csv(n_clicks):
     Input("zip", "value"))
 def export_data_as_csv(num, st, city, zip):
 
+    geoCodeUrl="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/findAddressCandidates"
+
+def singleAdressGeocode(address, geoCodeUrl, outSR = "4326"):
+#clean up the address for url encoding
+    address = address.replace(" ", "+")
+    address = address.replace(",", "%3B")
+
+    #send address to geocode service
+    lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
+    data = lookup.json()
+
+    if data["candidates"]:
+        #woo hoo results
+        coords = data["candidates"][0]["location"]
+        return coords
+    else:
+        #no results
+        return "Address not geocoded: " + address
+
+
+print(singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl))
+
+
+    # address = "1255 Olathe St, Aurora, CO 80011"
+
+    # geoCodeUrl="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses"
+
+    # def singleAdressGeocode(address, geoCodeUrl, outSR = "4326"):
+    # #clean up the address for url encoding
+    #     address = address.replace(" ", "+")
+    #     address = address.replace(",", "%3B")
+
+    #     #send address to geocode service
+    #     lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
+    #     data = lookup.json()
+
+    #     return print(singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl))
+
+        # if data["candidates"]:
+        #     #woo hoo results
+        #     coords = data["candidates"][0]["location"]
+        #     return coords
+        # else:
+            #no results
+            
+
+    
+
     # {"records":[{"attributes":{"OBJECTID":1,"STREET":"{}".format(address)}}]}
     # {"records":[{"attributes":{"OBJECTID":1,"STREET":"440 Arguello Blvd","ZONE":"94118"}}
     # print(address)
     # stuff = '"records":[{{"attributes":{{"OBJECTID":1,"STREET":"{}"}}'.format(address)
 
     # url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson"
-    url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%22+{}+{}+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%22{}%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson".format(num,st,zip)
-    response = urlopen(url)
-    data_json = json.loads(response.read())
-    # print(data_json)
-    location= data_json['locations'][0]['location']
-    # print(location)
-    latitude=location['y']
-    longitude=location['x']
+    # url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%22+{}+{}+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%22{}%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson".format(num,st,zip)
+    # response = urlopen(url)
+    # data_json = json.loads(response.read())
+    # # print(data_json)
+    # location= data_json['locations'][0]['location']
+    # # print(location)
+    # latitude=location['y']
+    # longitude=location['x']
     # print(latitude)
     # lat, lon = utm.to_latlon(latitude, longitude, 13, 'S')
 
 
 
-    return 'Address2 {}'.format(location), location
+    # return 'Address2 {}'.format(location), location
 
 
 
