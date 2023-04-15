@@ -157,7 +157,7 @@ def get_figure(all_rows, address, variable, opacity):
     df = all_rows 
     # print(address)
     address_df = pd.DataFrame(address, columns=address.keys(), index=[0])
-    # print(address_df)
+    print(address_df)
     
     fig=go.Figure()
     
@@ -225,33 +225,55 @@ def export_data_as_csv(n_clicks):
 @app.callback(
     Output("formatted_address", "children"),
     Output("address-data", "data"),
-    Input("number", "value"),
-    Input("street", "value"),
-    Input("city", "value"),
-    Input("zip", "value"))
-def export_data_as_csv(num, st, city, zip):
+    Input("address", "value"))
+def export_data_as_csv(address):
 
     geoCodeUrl="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/findAddressCandidates"
 
-def singleAdressGeocode(address, geoCodeUrl, outSR = "4326"):
-#clean up the address for url encoding
     address = address.replace(" ", "+")
     address = address.replace(",", "%3B")
 
-    #send address to geocode service
+    outSR = "4326"
+
     lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
     data = lookup.json()
+
+    # print(data)
 
     if data["candidates"]:
         #woo hoo results
         coords = data["candidates"][0]["location"]
-        return coords
+        print(coords)
+        coords_list = [(x, y) for x, y in coords.items()]
+        print(coords_list)
+        return coords_list
     else:
         #no results
         return "Address not geocoded: " + address
+    
+    # singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl)
+
+# def singleAdressGeocode(address, geoCodeUrl, outSR = "4326"):
+#clean up the address for url encoding
+    # address = address.replace(" ", "+")
+    # address = address.replace(",", "%3B")
+
+    #send address to geocode service
+    # lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
+    # data = lookup.json()
 
 
-print(singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl))
+
+#     if data["candidates"]:
+#         #woo hoo results
+#         coords = data["candidates"][0]["location"]
+#         return coords
+#     else:
+#         #no results
+#         return "Address not geocoded: " + address
+
+
+# print(singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl))
 
 
     # address = "1255 Olathe St, Aurora, CO 80011"
