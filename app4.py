@@ -260,6 +260,8 @@ def export_data_as_csv(address):
         coords_list = list(coords.items())
         print(coords_list)
         x_coordinate = coords_list[0][1]
+        y_coordinate = coords_list[1][1]
+        print(y_coordinate)
         print(x_coordinate)
         # coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
         coords_df = pd.DataFrame()
