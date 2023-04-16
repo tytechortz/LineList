@@ -128,18 +128,19 @@ app.layout = dbc.Container([
             )
         ], width=4),
     ]),
-    dbc.Row([
-        dbc.Col([
-            html.Div(id='formatted_address')
-        ], width=3),
-    ]),
+    # dbc.Row([
+    #     dbc.Col([
+    #         html.Div(id='formatted_address')
+    #     ], width=3),
+    # ]),
     dbc.Row([
         dbc.Col([
             html.Div(id='second_formatted_address')
         ], width=3),
     ]),     
-    dcc.Store(id='address-data', storage_type='session'),
-    # dcc.Store(id='ins-data', storage_type='memory'),
+    dcc.Store(id='address-x', storage_type='session'),
+    dcc.Store(id='address-y', storage_type='session'),
+    dcc.Store(id='formatted-address', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
 
@@ -147,17 +148,26 @@ app.layout = dbc.Container([
 @app.callback(
     Output('ct-map', 'figure'),
     Input('case-grid', 'virtualRowData'),
-    Input("address-data","data"),
+    Input("address-x","data"),
+    Input("address-y","data"),
     Input('tract-radio', 'value'),
     Input('opacity', 'value'))
-def get_figure(all_rows, address, variable, opacity):
+def get_figure(all_rows, x, y, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
-   
+    address_search=pd.read_json(x)
+    print(address_search)
+    # print(x)
+    # address_df = pd.DataFrame(x, columns=)
+    # print(x)
+    # print(y)
     df = all_rows 
     # print(address)
-    address_df = pd.DataFrame(address, columns=address.keys(), index=[0])
-    print(address_df)
+    # address_df = pd.DataFrame(address, columns=address.keys(), index=[0])
+    # if x and y:
+    #     address_df = pd.DataFrame(x,columns=['x','y'])
+    # print(type(address_df))
+    # print(address_df)
     
     fig=go.Figure()
     
@@ -182,8 +192,8 @@ def get_figure(all_rows, address, variable, opacity):
 
 
     fig.add_trace(go.Scattermapbox(
-                            lat=address_df['y'],
-                            lon=address_df['x'],
+                            lat=address_search.value[0],
+                            lon=address_search.value[1],
                             mode='markers',
                             marker=go.scattermapbox.Marker(
                                 size=15,
@@ -223,8 +233,9 @@ def export_data_as_csv(n_clicks):
     return False
 
 @app.callback(
-    Output("formatted_address", "children"),
-    Output("address-data", "data"),
+    # Output("formatted-address", "data"),
+    Output("address-x", "data"),
+    # Output("address-y", "data"),
     Input("address", "value"))
 def export_data_as_csv(address):
 
@@ -243,13 +254,16 @@ def export_data_as_csv(address):
     if data["candidates"]:
         #woo hoo results
         coords = data["candidates"][0]["location"]
-        print(coords)
-        coords_list = [(x, y) for x, y in coords.items()]
-        print(coords_list)
-        return coords_list
-    else:
-        #no results
-        return "Address not geocoded: " + address
+        # print(coords)
+        coords_list = list(coords.items())
+        coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
+        # print(coords_df)
+        # print(coords_list)
+        # print(coords_list[1])
+        return coords_df.to_json()
+    # else:
+    #     #no results
+    #     return "Address not geocoded: " + address
     
     # singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl)
 
