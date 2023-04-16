@@ -156,6 +156,7 @@ def get_figure(all_rows, x, y, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
     address_search=pd.read_json(x)
+    address_search.pivot(index=address_search.index, columns='ll', values='value')
     print(address_search)
     # print(x)
     # address_df = pd.DataFrame(x, columns=)
@@ -255,10 +256,15 @@ def export_data_as_csv(address):
         #woo hoo results
         coords = data["candidates"][0]["location"]
         # print(coords)
+        
         coords_list = list(coords.items())
-        coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
+        print(coords_list)
+        x_coordinate = coords_list[0][1]
+        print(x_coordinate)
+        # coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
+        coords_df = pd.DataFrame()
         # print(coords_df)
-        # print(coords_list)
+        # 
         # print(coords_list[1])
         return coords_df.to_json()
     # else:
