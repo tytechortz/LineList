@@ -12,6 +12,7 @@ from urllib.request import urlopen
 import json
 import utm
 import requests
+import datetime
 
 app = Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -47,7 +48,8 @@ case_df.rename(columns={'tract2000': 'FIPS'}, inplace=True)
 case_df['FIPS'] = case_df["FIPS"].astype(str)
 case_df['POV'] = np.where(case_df['FIPS'].isin(pov_tracts), 'T', 'F')
 case_df['INS'] = np.where(case_df['FIPS'].isin(ins_tracts), 'T', 'F')
-
+print(list(case_df.columns))
+print(case_df['reporteddate'][0])
 
 gdf_2020 = gpd.read_file('2020_CT/ArapahoeCT.shp')
 gdf_2020 = gdf_2020.to_crs('WGS84')
@@ -71,6 +73,23 @@ def blank_fig(height):
         },
     }
 
+# columnsDefs = 
+
+date_obj = "d3.timeParse('%m/%d/%Y')(params.data.reporteddate)"
+
+columnDefs = [
+    {"field": "profileid"},
+    {"field": "first_name"},
+    {"field": "geocoded_latitude"},
+    {"field": "geocoded_longitude"},
+    {
+        "field": "reporteddate",
+        "filter": "agDateColumnFilter",
+        "valueGetter": {"function": date_obj},
+        "valueFormatter": {"function": f"d3.timeFormat('%m/%d/%Y')({date_obj})"},
+    }
+]
+
 # defaultColDef = {
 #     "filter": True,
 #     "resizable": True,
@@ -83,7 +102,8 @@ def blank_fig(height):
 
 grid = dag.AgGrid(
     id="case-grid",
-    columnDefs=[{"headerName": i, "field": i, "editable": False} for i in case_df.columns],
+    # columnDefs=[{"headerName": i, "field": i, "editable": False} for i in case_df.columns],
+    columnDefs = columnDefs,
     rowData=case_df.to_dict("records"),
     dashGridOptions={"rowSelection": "muiltiple"},
     # columnSize="sizeToFit",
