@@ -36,7 +36,8 @@ pov_tracts = df_pov['FIPS']
 pov_tracts = pov_tracts.to_list()
 ins_tracts = df_ins['FIPS']
 ins_tracts = ins_tracts.to_list()
-case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+raw_case_df = pd.read_csv('/Users/jamesswank/Downloads/CSV.csv')
+case_df = raw_case_df.drop(raw_case_df.columns[[3]],axis=1)
 # print(case_df['tract2000'])
 case_df.rename(columns={'tract2000': 'FIPS'}, inplace=True)
 case_df['FIPS'] = case_df["FIPS"].astype(str)
