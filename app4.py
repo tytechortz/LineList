@@ -264,8 +264,9 @@ def export_data_as_csv(address):
         print(y_coordinate)
         print(x_coordinate)
         # coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
-        coords_df = pd.DataFrame()
-        # print(coords_df)
+        coords_df = pd.DataFrame(columns=['lat', 'lon'])
+        coords_df.loc[0] = [y_coordinate, x_coordinate]
+        print(coords_df)
         # 
         # print(coords_list[1])
         return coords_df.to_json()
