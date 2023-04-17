@@ -156,19 +156,10 @@ def get_figure(all_rows, x, y, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
     address_search=pd.read_json(x)
-    # address_search.pivot(index=address_search.index, columns='ll', values='value')
-    print(address_search)
-    # print(x)
-    # address_df = pd.DataFrame(x, columns=)
-    # print(x)
-    # print(y)
+    
+    
     df = all_rows 
-    # print(address)
-    # address_df = pd.DataFrame(address, columns=address.keys(), index=[0])
-    # if x and y:
-    #     address_df = pd.DataFrame(x,columns=['x','y'])
-    # print(type(address_df))
-    # print(address_df)
+    
     
     fig=go.Figure()
     
@@ -250,100 +241,22 @@ def export_data_as_csv(address):
     lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
     data = lookup.json()
 
-    # print(data)
 
     if data["candidates"]:
         #woo hoo results
         coords = data["candidates"][0]["location"]
-        # print(coords)
+       
         
         coords_list = list(coords.items())
-        # print(coords_list)
+   
         x_coordinate = coords_list[0][1]
         y_coordinate = coords_list[1][1]
-        # print(y_coordinate)
-        # print(x_coordinate)
-        # coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
+       
         coords_df = pd.DataFrame(columns=['lat', 'lon'])
         coords_df.loc[0] = [y_coordinate, x_coordinate]
-        # print(coords_df)
-        # 
-        # print(coords_list[1])
+       
         return coords_df.to_json()
-    # else:
-    #     #no results
-    #     return "Address not geocoded: " + address
     
-    # singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl)
-
-# def singleAdressGeocode(address, geoCodeUrl, outSR = "4326"):
-#clean up the address for url encoding
-    # address = address.replace(" ", "+")
-    # address = address.replace(",", "%3B")
-
-    #send address to geocode service
-    # lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
-    # data = lookup.json()
-
-
-
-#     if data["candidates"]:
-#         #woo hoo results
-#         coords = data["candidates"][0]["location"]
-#         return coords
-#     else:
-#         #no results
-#         return "Address not geocoded: " + address
-
-
-# print(singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl))
-
-
-    # address = "1255 Olathe St, Aurora, CO 80011"
-
-    # geoCodeUrl="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses"
-
-    # def singleAdressGeocode(address, geoCodeUrl, outSR = "4326"):
-    # #clean up the address for url encoding
-    #     address = address.replace(" ", "+")
-    #     address = address.replace(",", "%3B")
-
-    #     #send address to geocode service
-    #     lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
-    #     data = lookup.json()
-
-    #     return print(singleAdressGeocode("1255 Olathe St, Aurora, CO 80011", geoCodeUrl))
-
-        # if data["candidates"]:
-        #     #woo hoo results
-        #     coords = data["candidates"][0]["location"]
-        #     return coords
-        # else:
-            #no results
-            
-
-    
-
-    # {"records":[{"attributes":{"OBJECTID":1,"STREET":"{}".format(address)}}]}
-    # {"records":[{"attributes":{"OBJECTID":1,"STREET":"440 Arguello Blvd","ZONE":"94118"}}
-    # print(address)
-    # stuff = '"records":[{{"attributes":{{"OBJECTID":1,"STREET":"{}"}}'.format(address)
-
-    # url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%221255+Olathe+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%2280011%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson"
-    # url="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/geocodeAddresses?addresses=%7B+++++++%0D%0A++++%22records%22%3A+%5B%0D%0A++++++++%7B%0D%0A++++++++++++%22attributes%22%3A+%7B%0D%0A++++++++++++++++%22OBJECTID%22%3A+1%2C%0D%0A++++++++++++++++%22STREET%22%3A+%22+{}+{}+St%22%2C%0D%0A++++++++++++++++%22ZONE%22%3A+%22{}%22%0D%0A++++++++++++%7D%0D%0A++++++++%7D%2C%0D%0A++++%5D%0D%0A%7D&category=&sourceCountry=&matchOutOfRange=true&langCode=&locationType=&searchExtent=&outSR=4326&f=pjson".format(num,st,zip)
-    # response = urlopen(url)
-    # data_json = json.loads(response.read())
-    # # print(data_json)
-    # location= data_json['locations'][0]['location']
-    # # print(location)
-    # latitude=location['y']
-    # longitude=location['x']
-    # print(latitude)
-    # lat, lon = utm.to_latlon(latitude, longitude, 13, 'S')
-
-
-
-    # return 'Address2 {}'.format(location), location
 
 
 
