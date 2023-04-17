@@ -156,7 +156,7 @@ def get_figure(all_rows, x, y, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
     address_search=pd.read_json(x)
-    address_search.pivot(index=address_search.index, columns='ll', values='value')
+    # address_search.pivot(index=address_search.index, columns='ll', values='value')
     print(address_search)
     # print(x)
     # address_df = pd.DataFrame(x, columns=)
@@ -193,8 +193,8 @@ def get_figure(all_rows, x, y, variable, opacity):
 
 
     fig.add_trace(go.Scattermapbox(
-                            lat=address_search.value[0],
-                            lon=address_search.value[1],
+                            lat=address_search['lat'],
+                            lon=address_search['lon'],
                             mode='markers',
                             marker=go.scattermapbox.Marker(
                                 size=15,
@@ -258,15 +258,15 @@ def export_data_as_csv(address):
         # print(coords)
         
         coords_list = list(coords.items())
-        print(coords_list)
+        # print(coords_list)
         x_coordinate = coords_list[0][1]
         y_coordinate = coords_list[1][1]
-        print(y_coordinate)
-        print(x_coordinate)
+        # print(y_coordinate)
+        # print(x_coordinate)
         # coords_df = pd.DataFrame(coords_list,columns=['ll','value'])
         coords_df = pd.DataFrame(columns=['lat', 'lon'])
         coords_df.loc[0] = [y_coordinate, x_coordinate]
-        print(coords_df)
+        # print(coords_df)
         # 
         # print(coords_list[1])
         return coords_df.to_json()
