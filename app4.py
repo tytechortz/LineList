@@ -122,7 +122,7 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dcc.Input(
-                id='address',
+                id='input-address',
                 type='text',
                 placeholder='enter address'
             )
@@ -138,9 +138,9 @@ app.layout = dbc.Container([
     #         html.Div(id='second_formatted_address')
     #     ], width=3),
     # ]),     
-    dcc.Store(id='address-x', storage_type='memory'),
-    dcc.Store(id='address-y', storage_type='memory'),
-    dcc.Store(id='formatted-address', storage_type='memory'),
+    dcc.Store(id='address', storage_type='memory'),
+    # dcc.Store(id='address-y', storage_type='memory'),
+    # dcc.Store(id='formatted-address', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
 
@@ -148,11 +148,11 @@ app.layout = dbc.Container([
 @app.callback(
     Output('ct-map', 'figure'),
     Input('case-grid', 'virtualRowData'),
-    Input("address-x","data"),
-    Input("address-y","data"),
+    Input("address","data"),
+    # Input("address-y","data"),
     Input('tract-radio', 'value'),
     Input('opacity', 'value'))
-def get_figure(all_rows, x, y, variable, opacity):
+def get_figure(all_rows, address, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
     
@@ -182,8 +182,8 @@ def get_figure(all_rows, x, y, variable, opacity):
                                 showscale=False,
             ))
 
-    if x:
-        address_search=pd.read_json(x)
+    if address:
+        address_search=pd.read_json(address)
 
         fig.add_trace(go.Scattermapbox(
                                 lat=address_search['lat'],
@@ -228,9 +228,9 @@ def export_data_as_csv(n_clicks):
 
 @app.callback(
     # Output("formatted-address", "data"),
-    Output("address-x", "data"),
+    Output("address", "data"),
     Input("sub-add", "n_clicks"),
-    Input("address", "value"))
+    Input("input-address", "value"))
 def export_data_as_csv(n_clicks, address):
 
     geoCodeUrl="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/findAddressCandidates"
