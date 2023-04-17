@@ -128,16 +128,16 @@ app.layout = dbc.Container([
             )
         ], width=4),
     ]),
-    # dbc.Row([
-    #     dbc.Col([
-    #         html.Div(id='formatted_address')
-    #     ], width=3),
-    # ]),
     dbc.Row([
         dbc.Col([
-            html.Div(id='second_formatted_address')
+            html.Button('Submit Address',id='sub-add')
         ], width=3),
-    ]),     
+    ]),
+    # dbc.Row([
+    #     dbc.Col([
+    #         html.Div(id='second_formatted_address')
+    #     ], width=3),
+    # ]),     
     dcc.Store(id='address-x', storage_type='session'),
     dcc.Store(id='address-y', storage_type='session'),
     dcc.Store(id='formatted-address', storage_type='memory'),
