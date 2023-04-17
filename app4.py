@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, ctx
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import geopandas as gpd
@@ -130,7 +130,7 @@ app.layout = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col([
-            html.Button('Submit Address',id='sub-add')
+            html.Button('Submit Address',id='sub-add', n_clicks=0)
         ], width=3),
     ]),
     # dbc.Row([
@@ -138,8 +138,8 @@ app.layout = dbc.Container([
     #         html.Div(id='second_formatted_address')
     #     ], width=3),
     # ]),     
-    dcc.Store(id='address-x', storage_type='session'),
-    dcc.Store(id='address-y', storage_type='session'),
+    dcc.Store(id='address-x', storage_type='memory'),
+    dcc.Store(id='address-y', storage_type='memory'),
     dcc.Store(id='formatted-address', storage_type='memory'),
     # dcc.Store(id='case-data', storage_type='memory'),
 ])    
@@ -155,7 +155,7 @@ app.layout = dbc.Container([
 def get_figure(all_rows, x, y, variable, opacity):
 
     all_rows = pd.DataFrame(all_rows)
-    address_search=pd.read_json(x)
+    
     
     
     df = all_rows 
@@ -182,16 +182,18 @@ def get_figure(all_rows, x, y, variable, opacity):
                                 showscale=False,
             ))
 
+    if x:
+        address_search=pd.read_json(x)
 
-    fig.add_trace(go.Scattermapbox(
-                            lat=address_search['lat'],
-                            lon=address_search['lon'],
-                            mode='markers',
-                            marker=go.scattermapbox.Marker(
-                                size=15,
-                                color='blue',
-                            ),
-                    ))
+        fig.add_trace(go.Scattermapbox(
+                                lat=address_search['lat'],
+                                lon=address_search['lon'],
+                                mode='markers',
+                                marker=go.scattermapbox.Marker(
+                                    size=15,
+                                    color='blue',
+                                ),
+                        ))
 
     fig.add_trace(go.Scattermapbox(
                             lat=df['geocoded_latitude'],
@@ -227,35 +229,37 @@ def export_data_as_csv(n_clicks):
 @app.callback(
     # Output("formatted-address", "data"),
     Output("address-x", "data"),
-    # Output("address-y", "data"),
+    Input("sub-add", "n_clicks"),
     Input("address", "value"))
-def export_data_as_csv(address):
+def export_data_as_csv(n_clicks, address):
 
     geoCodeUrl="https://gis.arapahoegov.com/arcgis/rest/services/AddressLocator/GeocodeServer/findAddressCandidates"
 
-    address = address.replace(" ", "+")
-    address = address.replace(",", "%3B")
+    if "sub-add" == ctx.triggered_id:
+        address = address.replace(" ", "+")
+        address = address.replace(",", "%3B")
 
-    outSR = "4326"
+        outSR = "4326"
 
-    lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
-    data = lookup.json()
+        lookup = requests.get(geoCodeUrl + "?SingleLine=" + address + "&outSR=" + outSR + "&maxLocations=1&f=pjson")
+        data = lookup.json()
 
 
-    if data["candidates"]:
-        #woo hoo results
-        coords = data["candidates"][0]["location"]
-       
+
+        if data["candidates"]:
+            #woo hoo results
+            coords = data["candidates"][0]["location"]
         
-        coords_list = list(coords.items())
-   
-        x_coordinate = coords_list[0][1]
-        y_coordinate = coords_list[1][1]
-       
-        coords_df = pd.DataFrame(columns=['lat', 'lon'])
-        coords_df.loc[0] = [y_coordinate, x_coordinate]
-       
-        return coords_df.to_json()
+            if n_clicks:   
+                coords_list = list(coords.items())
+        
+                x_coordinate = coords_list[0][1]
+                y_coordinate = coords_list[1][1]
+            
+                coords_df = pd.DataFrame(columns=['lat', 'lon'])
+                coords_df.loc[0] = [y_coordinate, x_coordinate]
+            
+                return coords_df.to_json()
     
 
 
